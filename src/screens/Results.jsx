@@ -10,7 +10,6 @@ const LABELS = Object.fromEntries(
   )
 )
 
-// Haptic feedback — silently no-ops on web
 async function haptic(style = 'LIGHT') {
   try {
     const { Haptics, ImpactStyle } = await import('@capacitor/haptics')
@@ -18,17 +17,26 @@ async function haptic(style = 'LIGHT') {
   } catch {}
 }
 
-// Native share sheet — falls back to Web Share API, then clipboard
-async function nativeShare(text) {
+async function shareAsImage(element, fallbackText) {
+  try {
+    const html2canvas = (await import('html2canvas')).default
+    const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: '#ffffff' })
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'))
+    const file = new File([blob], 'epc-estimate.png', { type: 'image/png' })
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'My EPC Estimate' })
+      return
+    }
+  } catch {}
   try {
     const { Share } = await import('@capacitor/share')
-    await Share.share({ text, dialogTitle: 'Share your EPC estimate' })
+    await Share.share({ text: fallbackText, dialogTitle: 'Share your EPC estimate' })
     return
   } catch {}
   try {
-    if (navigator.share) { await navigator.share({ text }); return }
+    if (navigator.share) { await navigator.share({ text: fallbackText }); return }
   } catch {}
-  try { await navigator.clipboard.writeText(text) } catch {}
+  try { await navigator.clipboard.writeText(fallbackText) } catch {}
 }
 
 export default function Results({ answers, onBack, onEdit }) {
@@ -60,8 +68,8 @@ export default function Results({ answers, onBack, onEdit }) {
   async function handleShare() {
     haptic('LIGHT')
     setShareState('sharing')
-    const text = `My home's EPC estimate: Band ${band.band} (${score}/100 — ${band.label}). Estimated annual energy cost: £${cost.toLocaleString()}. Calculated with the EPC Estimator app.`
-    await nativeShare(text)
+    const fallback = `My home's EPC estimate: Band ${band.band} (${score}/100 — ${band.label}). Estimated annual energy cost: £${cost.toLocaleString()}. Calculated with the EPC Estimator app.`
+    await shareAsImage(captureRef.current, fallback)
     setShareState('done')
     setTimeout(() => setShareState('idle'), 2000)
   }
@@ -106,15 +114,34 @@ export default function Results({ answers, onBack, onEdit }) {
           </div>
         </div>
 
-        {/* Save */}
-        {saveState === 'idle' && (
-          <div className="action-row">
-            <button className="btn-action" onClick={() => { haptic(); setSaveState('naming') }}>💾 Save</button>
-            <button className="btn-action" onClick={handleShare} disabled={shareState === 'sharing'}>
-              {shareState === 'done' ? '✓ Shared!' : shareState === 'sharing' ? '…' : '↗ Share'}
-            </button>
-          </div>
-        )}
+        <p className="section-title">EPC Scale</p>
+        <div className="epc-ladder">
+          {BANDS.map(b => (
+            <div key={b.band} className={`epc-rung${b.band === band.band ? ' current' : ''}`}>
+              <span className="rung-band">{b.band}</span>
+              <div className="rung-bar" style={{ background: b.color, width: `${WIDTHS[b.band]}%` }}>
+                {b.band === band.band ? `◀ ${score}` : `${b.min}–${b.max}`}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* 2×2 action grid */}
+        <div className="action-grid">
+          <button
+            className={`btn-action${saveState === 'saved' ? ' done' : ''}`}
+            onClick={() => { if (saveState === 'idle') { haptic(); setSaveState('naming') } }}
+            disabled={saveState === 'saved'}
+          >
+            {saveState === 'saved' ? `✓ ${saveName.trim() || 'Saved'}` : '💾 Save'}
+          </button>
+          <button className="btn-action" onClick={handleShare} disabled={shareState === 'sharing'}>
+            {shareState === 'done' ? '✓ Shared!' : shareState === 'sharing' ? '…' : '↗ Share'}
+          </button>
+          <button className="btn-action" onClick={() => { haptic(); onEdit() }}>✏️ Edit</button>
+          <button className="btn-action btn-action-exit" onClick={() => { haptic(); onBack() }}>Exit</button>
+        </div>
+
         {saveState === 'naming' && (
           <div className="save-name-row">
             <input
@@ -129,26 +156,6 @@ export default function Results({ answers, onBack, onEdit }) {
             <button className="btn-save-confirm" onClick={confirmSave}>Save</button>
           </div>
         )}
-        {saveState === 'saved' && (
-          <div className="action-row">
-            <button className="btn-action done" disabled>✓ {saveName.trim() || 'Saved'}</button>
-            <button className="btn-action" onClick={handleShare} disabled={shareState === 'sharing'}>
-              {shareState === 'done' ? '✓ Shared!' : shareState === 'sharing' ? '…' : '↗ Share'}
-            </button>
-          </div>
-        )}
-
-        <p className="section-title">EPC Scale</p>
-        <div className="epc-ladder">
-          {BANDS.map(b => (
-            <div key={b.band} className={`epc-rung${b.band === band.band ? ' current' : ''}`}>
-              <span className="rung-band">{b.band}</span>
-              <div className="rung-bar" style={{ background: b.color, width: `${WIDTHS[b.band]}%` }}>
-                {b.band === band.band ? `◀ ${score}` : `${b.min}–${b.max}`}
-              </div>
-            </div>
-          ))}
-        </div>
 
         <div className="inputs-header-row">
           <p className="section-title" style={{ marginTop: 24, marginBottom: 0 }}>Your inputs</p>
@@ -169,10 +176,6 @@ export default function Results({ answers, onBack, onEdit }) {
         <p className="results-disclaimer">
           This is an estimate only — not an official EPC. A qualified Domestic Energy Assessor (DEA) must carry out an official assessment.
         </p>
-        <div className="bottom-actions">
-          <button className="btn-outline" onClick={() => { haptic(); onBack() }}>Exit without saving</button>
-          <button className="btn-action" onClick={() => { haptic(); onEdit() }}>Edit inputs</button>
-        </div>
 
         <div style={{ height: 72 }} />
       </div>
