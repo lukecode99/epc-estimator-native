@@ -20,7 +20,8 @@
     "@capacitor/share": "^8.0.1",
     "html2canvas": "^1.4.1",
     "react": "^19.2.6",
-    "react-dom": "^19.2.6"
+    "react-dom": "^19.2.6",
+    "tweetsodium": "^0.0.4"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
