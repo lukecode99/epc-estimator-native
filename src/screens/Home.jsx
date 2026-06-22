@@ -8,9 +8,10 @@ export default function Home({ onStart, onSaved, onPrivacy }) {
   return (
     <div className="screen">
       <div className="home-hero">
-        <div className="logo">🏠</div>
-        <h1>EPC Estimator</h1>
-        <p>Get an estimated Energy Performance Certificate rating for your home in minutes</p>
+        <div className="home-hero-row">
+          <span className="logo">🏠</span>
+          <h1>EPC Estimator</h1>
+        </div>
       </div>
       <div className="home-body">
         <div className="home-features">
