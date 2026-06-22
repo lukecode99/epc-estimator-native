@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "EPC Estimator",
+    "slug": "epc-estimator",
+    "owner": "nanoluke",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "epcestimator",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "uk.co.epcestimator.app"
+    },
+    "android": {
+      "package": "uk.co.epcestimator.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./public/icon-512.png",
+        "backgroundColor": "#1a3a5c"
+      }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "be59a813-3683-4b1a-9883-d0409cd8d9c2"
+      }
+    }
+  }
+}
