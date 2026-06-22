@@ -5,6 +5,7 @@ body {
   background: #f0f4f8;
   color: #1a2233;
   min-height: 100vh;
+  font-size: 15px;
 }
 
 #root {
@@ -23,10 +24,11 @@ body {
 .screen-header {
   background: linear-gradient(135deg, #1a3a5c 0%, #2563a8 100%);
   color: #fff;
-  padding: 28px 20px 20px;
+  padding: 20px 20px 16px;
+  padding-top: calc(20px + env(safe-area-inset-top));
 }
-.screen-header h1 { font-size: 1.4rem; font-weight: 700; }
-.screen-header p  { font-size: 0.85rem; opacity: 0.85; margin-top: 4px; }
+.screen-header h1 { font-size: 1.3rem; font-weight: 700; color: #fff; }
+.screen-header p  { font-size: 0.82rem; opacity: 0.85; margin-top: 4px; color: #fff; }
 
 .screen-body {
   flex: 1;
@@ -37,12 +39,13 @@ body {
 .home-hero {
   background: linear-gradient(135deg, #1a3a5c 0%, #2563a8 100%);
   color: #fff;
-  padding: 48px 24px 36px;
+  padding: 40px 24px 28px;
+  padding-top: calc(40px + env(safe-area-inset-top));
   text-align: center;
 }
-.home-hero .logo { font-size: 3rem; margin-bottom: 10px; }
-.home-hero h1 { font-size: 1.6rem; font-weight: 800; }
-.home-hero p  { font-size: 0.9rem; opacity: 0.85; margin-top: 6px; }
+.home-hero .logo { font-size: 2.6rem; margin-bottom: 8px; }
+.home-hero h1 { font-size: 1.5rem; font-weight: 800; color: #fff; }
+.home-hero p  { font-size: 0.87rem; opacity: 0.85; margin-top: 6px; color: #fff; }
 
 .home-body { padding: 24px 20px; }
 
@@ -299,29 +302,27 @@ body {
 .preset-name { font-size: 0.8rem; font-weight: 600; color: #1a2233; }
 .preset-m2   { font-size: 0.75rem; color: #6b7c93; }
 
-/* Action row */
+/* Action row (legacy, kept for compatibility) */
 .action-row {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
 }
 
-/* Bottom CTA row on results page */
-.bottom-actions {
-  display: flex;
+/* 2×2 action grid on results page */
+.action-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 10px;
-  margin-top: 16px;
+  margin-bottom: 20px;
 }
-.bottom-actions .btn-outline {
-  display: block;
-  flex: 1;
-  width: auto;
-  margin-top: 0;
+.btn-action-exit {
+  background: #f0f4f8;
+  color: #6b7c93;
+  border-color: #d0d7e2;
 }
-.bottom-actions .btn-action {
-  flex: 1;
-  margin-top: 0;
-}
+.btn-action-exit:hover { background: #e2e8f0; color: #1a2233; }
+
 .btn-action {
   flex: 1;
   background: #f0f6ff;
