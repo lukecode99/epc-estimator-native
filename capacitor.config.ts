@@ -19,7 +19,7 @@ const config: CapacitorConfig = {
     allowMixedContent: false,
   },
   ios: {
-    contentInset: 'automatic',
+    contentInset: 'never',
   },
 };
 

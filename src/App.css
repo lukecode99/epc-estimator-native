@@ -55,7 +55,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding-top: 8px;
+  padding-top: 4px;
 }
 .home-hero .logo { font-size: 1.4rem; flex-shrink: 0; }
 .home-hero h1 { font-size: 1.3rem; font-weight: 800; color: #fff; margin: 0; }
