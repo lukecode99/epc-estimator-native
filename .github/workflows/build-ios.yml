@@ -66,6 +66,7 @@ jobs:
             PROVISIONING_PROFILE="b9f79e51-c84f-4ee4-aac9-a0d41b97e63e" \
             PROVISIONING_PROFILE_SPECIFIER="EPC Estimator Distribution" \
             DEVELOPMENT_TEAM="${{ secrets.IOS_TEAM_ID }}" \
+            CURRENT_PROJECT_VERSION=${{ github.run_number }} \
             -allowProvisioningUpdates
 
       - name: Export IPA
