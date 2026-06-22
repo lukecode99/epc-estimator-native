@@ -45,8 +45,8 @@ jobs:
       - name: Install provisioning profile
         run: |
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          echo "${{ secrets.IOS_PROVISION_BASE64 }}" | base64 --decode \
-            > ~/Library/MobileDevice/Provisioning\ Profiles/EpcEstimator.mobileprovision
+          PROFILE_PATH=~/Library/MobileDevice/Provisioning\ Profiles/b9f79e51-c84f-4ee4-aac9-a0d41b97e63e.mobileprovision
+          echo "${{ secrets.IOS_PROVISION_BASE64 }}" | base64 --decode > "$PROFILE_PATH"
 
       - name: Decode App Store Connect key
         run: |
@@ -63,6 +63,7 @@ jobs:
             -archivePath $RUNNER_TEMP/App.xcarchive \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="iPhone Distribution" \
+            PROVISIONING_PROFILE="b9f79e51-c84f-4ee4-aac9-a0d41b97e63e" \
             PROVISIONING_PROFILE_SPECIFIER="EPC Estimator Distribution" \
             DEVELOPMENT_TEAM="${{ secrets.IOS_TEAM_ID }}" \
             -allowProvisioningUpdates
