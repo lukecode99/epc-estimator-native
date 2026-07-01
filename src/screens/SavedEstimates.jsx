@@ -13,11 +13,12 @@ export default function SavedEstimates({ onBack, onView }) {
 
   return (
     <div className="screen">
-      <div className="screen-header">
+      <div className="home-hero">
+        <div className="logo">💾</div>
         <h1>Saved Estimates</h1>
-        <p>{estimates.length} saved</p>
+        <p>{estimates.length} estimate{estimates.length !== 1 ? 's' : ''} saved</p>
       </div>
-      <div className="screen-body">
+      <div className="home-body">
         {estimates.length === 0 && (
           <p style={{ color: '#9aa5b4', textAlign: 'center', marginTop: 40 }}>
             No saved estimates yet. Complete an assessment and tap "Save estimate".
@@ -40,6 +41,10 @@ export default function SavedEstimates({ onBack, onView }) {
         ))}
         <div style={{ marginTop: 20 }}>
           <button className="btn-outline" onClick={onBack}>← Back</button>
+        </div>
+        <div className="ad-slot">
+          <span className="ad-label">Ad</span>
+          <p className="ad-text">Your advert here — reach energy-conscious homeowners</p>
         </div>
       </div>
     </div>

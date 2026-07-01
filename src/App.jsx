@@ -12,7 +12,7 @@ export default function App() {
   const [answers, setAnswers] = useState({})
 
   useEffect(() => {
-    if (screen === 'results') showBanner()
+    if (screen === 'results' || screen === 'saved') showBanner()
     else hideBanner()
   }, [screen])
 
