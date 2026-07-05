@@ -8,6 +8,7 @@
     "build": "vite build",
     "build:native": "vite build --config vite.native.config.js",
     "lint": "eslint .",
+    "test": "node test/storage.test.mjs && EPC_TEST_PLATFORM=web node test/storage.test.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

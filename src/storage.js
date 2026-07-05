@@ -8,15 +8,21 @@ import { Capacitor } from '@capacitor/core'
 const KEY = 'epc_estimates'
 export const SAVE_CAP = 20
 
-let prefsPromise = null
-function getPrefs() {
-  if (!Capacitor.isNativePlatform()) return Promise.resolve(null)
-  if (!prefsPromise) {
-    prefsPromise = import('@capacitor/preferences')
-      .then(m => m.Preferences)
-      .catch(() => null)
+// The promise must resolve with the *module namespace*, never with the
+// Preferences plugin itself: registerPlugin() returns a Proxy that answers
+// every property lookup — including `.then` — with a plugin-method wrapper,
+// so resolving a promise with it makes the engine treat it as a thenable and
+// call proxy.then(), which never settles on native. Read `.Preferences` off
+// the namespace synchronously after awaiting, and never return the plugin
+// from an async function (that re-triggers the same trap).
+let prefsModulePromise = null
+async function getPrefs() {
+  if (!Capacitor.isNativePlatform()) return null
+  if (!prefsModulePromise) {
+    prefsModulePromise = import('@capacitor/preferences').catch(() => null)
   }
-  return prefsPromise
+  const mod = await prefsModulePromise
+  return mod ? { prefs: mod.Preferences } : null
 }
 
 function parse(json) {
@@ -29,8 +35,9 @@ function parse(json) {
 }
 
 export async function loadEstimates() {
-  const prefs = await getPrefs()
-  if (!prefs) return parse(localStorage.getItem(KEY))
+  const native = await getPrefs()
+  if (!native) return parse(localStorage.getItem(KEY))
+  const { prefs } = native
 
   const { value } = await prefs.get({ key: KEY })
   if (value != null) return parse(value)
@@ -58,16 +65,16 @@ export async function loadEstimates() {
 
 export async function storeEstimates(list) {
   const json = JSON.stringify(list)
-  const prefs = await getPrefs()
-  if (prefs) await prefs.set({ key: KEY, value: json })
+  const native = await getPrefs()
+  if (native) await native.prefs.set({ key: KEY, value: json })
   else localStorage.setItem(KEY, json)
 }
 
 // Generic key/value on the same backing store (Preferences on native,
 // localStorage on web) for other features — no migration logic.
 export async function kvGet(key) {
-  const prefs = await getPrefs()
-  if (prefs) return (await prefs.get({ key })).value
+  const native = await getPrefs()
+  if (native) return (await native.prefs.get({ key })).value
   try {
     return localStorage.getItem(key)
   } catch {
@@ -76,7 +83,7 @@ export async function kvGet(key) {
 }
 
 export async function kvSet(key, value) {
-  const prefs = await getPrefs()
-  if (prefs) await prefs.set({ key, value })
+  const native = await getPrefs()
+  if (native) await native.prefs.set({ key, value })
   else localStorage.setItem(key, value)
 }
