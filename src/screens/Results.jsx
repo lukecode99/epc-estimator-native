@@ -1,12 +1,23 @@
 import { useState, useRef, Fragment } from 'react'
-import { calculateSAP, getBand, getAnnualCost, getImprovements, combinePlan, HEATING_GROUP, PRICE_CAP_BASIS } from '../sap'
+import { calculateSAP, getBand, getAnnualCost, getImprovements, combinePlan, parseRange, HEATING_GROUP, PRICE_CAP_BASIS } from '../sap'
 import { BANDS, QUESTIONS } from '../data'
 import { loadEstimates, storeEstimates, SAVE_CAP } from '../storage'
 import OfficialEpc from './OfficialEpc'
 import LandlordMees from './LandlordMees'
 import { grantsFor, quoteUrl, logLinkOut } from '../referrals'
+import { IconSave, IconShare, IconEdit, IconChevronRight, ImprovementIcon } from '../icons'
+import { Capacitor } from '@capacitor/core'
 
 const WIDTHS = { A: 55, B: 62, C: 70, D: 78, E: 84, F: 90, G: 96 }
+
+const bandColor = letter => (BANDS.find(b => b.band === letter) || {}).color || '#6b7c93'
+
+// £ / ££ / £££ from the midpoint of an improvement's cost range.
+function costTier(cost) {
+  const [lo, hi] = parseRange(cost)
+  const mid = (lo + hi) / 2
+  return mid < 1500 ? '£' : mid <= 5000 ? '££' : '£££'
+}
 
 const LABELS = Object.fromEntries(
   QUESTIONS.flatMap(q =>
@@ -43,7 +54,7 @@ async function shareAsImage(element, fallbackText) {
   try { await navigator.clipboard.writeText(fallbackText) } catch {}
 }
 
-export default function Results({ answers, savedEntry, onBack, onEdit }) {
+export default function Results({ answers, savedEntry, onBack, onEdit, onEditQuestion }) {
   // A viewed saved estimate shows exactly what was stored — score, band,
   // cost and improvements are NOT recomputed (the model may have changed
   // since it was saved). A live/edited result computes fresh.
@@ -160,7 +171,9 @@ export default function Results({ answers, savedEntry, onBack, onEdit }) {
                         onClick={() => toggleImprovement(imp)}
                       >
                         <div className="imp-title-row">
+                          <span className="imp-icon"><ImprovementIcon title={imp.title} size={18} /></span>
                           <h4>{imp.title}</h4>
+                          <span className="cost-tier">{costTier(imp.cost)}</span>
                           <span className={`imp-check${checked ? ' on' : ''}`} aria-hidden="true">{checked ? '✓' : ''}</span>
                         </div>
                         {grantsFor(imp.title).length > 0 && (
@@ -177,7 +190,10 @@ export default function Results({ answers, savedEntry, onBack, onEdit }) {
                         </div>
                         <div className="imp-actions-row">
                           <span className="improvement-gain">
-                            Could reach band {imp.newBand} ({imp.newScore}/100) ↑ +{imp.scoreGain} pts
+                            <span className="band-chip" style={{ background: bandColor(band.band) }}>{band.band}</span>
+                            <span className="band-chip-arrow">→</span>
+                            <span className="band-chip" style={{ background: bandColor(imp.newBand) }}>{imp.newBand}</span>
+                            <span className="band-chip-pts">+{imp.scoreGain} pts · {imp.newScore}/100</span>
                           </span>
                           <a
                             className="btn-quotes"
@@ -222,37 +238,12 @@ export default function Results({ answers, savedEntry, onBack, onEdit }) {
           ))}
         </div>
 
-        {/* 2×2 action grid */}
         <div className="action-grid">
-          <button
-            className={`btn-action${saveState === 'saved' ? ' done' : ''}`}
-            onClick={() => { if (saveState === 'idle') { haptic(); setSaveState('naming') } }}
-            disabled={saveState === 'saved'}
-          >
-            {saveState === 'saved' ? `✓ ${saveName.trim() || 'Saved'}` : '💾 Save'}
+          <button className="btn-action" onClick={() => { haptic(); onEdit() }}>
+            <IconEdit size={16} /> Edit answers
           </button>
-          <button className="btn-action" onClick={handleShare} disabled={shareState === 'sharing'}>
-            {shareState === 'done' ? '✓ Shared!' : shareState === 'sharing' ? '…' : '↗ Share'}
-          </button>
-          <button className="btn-action" onClick={() => { haptic(); onEdit() }}>✏️ Edit</button>
           <button className="btn-action btn-action-exit" onClick={() => { haptic(); onBack() }}>Exit</button>
         </div>
-
-        {saveState === 'naming' && (
-          <div className="save-name-row">
-            <input
-              className="save-name-input"
-              type="text"
-              placeholder="Name this estimate (e.g. My Home)"
-              value={saveName}
-              onChange={e => setSaveName(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && confirmSave()}
-              autoFocus
-            />
-            <button className="btn-save-confirm" onClick={confirmSave}>Save</button>
-          </div>
-        )}
-        {saveError && <p className="input-error">{saveError}</p>}
 
         <LandlordMees improvements={improvements} score={score} />
 
@@ -266,10 +257,15 @@ export default function Results({ answers, savedEntry, onBack, onEdit }) {
             const v = answers[q.key]
             if (!v) return null
             return (
-              <div className="input-row" key={q.key}>
+              <button
+                className="input-row input-row-btn"
+                key={q.key}
+                onClick={() => { haptic(); onEditQuestion && onEditQuestion(q.key) }}
+              >
                 <span className="input-label">{q.text.replace('?','')}</span>
                 <span className="input-val">{LABELS[v] || `${v} m²`}</span>
-              </div>
+                <span className="input-chevron"><IconChevronRight size={16} /></span>
+              </button>
             )
           })}
         </div>
@@ -278,7 +274,43 @@ export default function Results({ answers, savedEntry, onBack, onEdit }) {
           This is an estimate only — not an official EPC. A qualified Domestic Energy Assessor (DEA) must carry out an official assessment.
         </p>
 
-        <div style={{ height: 72 }} />
+        {/* Clearance for the sticky bar (plus the AdMob banner on native). */}
+        <div style={{ height: Capacitor.isNativePlatform() ? 170 : 96 }} />
+      </div>
+
+      {/* Sticky Save/Share bar — Share is the growth loop, so it stays on
+          screen at all times. Sits above the AdMob banner on native. */}
+      <div className={`sticky-actions${Capacitor.isNativePlatform() ? ' above-banner' : ''}`}>
+        {saveError && <p className="input-error sticky-error">{saveError}</p>}
+        <div className="sticky-actions-row">
+        {saveState === 'naming' ? (
+          <div className="save-name-row">
+            <input
+              className="save-name-input"
+              type="text"
+              placeholder="Name this estimate (e.g. My Home)"
+              value={saveName}
+              onChange={e => setSaveName(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && confirmSave()}
+              autoFocus
+            />
+            <button className="btn-save-confirm" onClick={confirmSave}>Save</button>
+          </div>
+        ) : (
+          <>
+            <button
+              className={`btn-sticky${saveState === 'saved' ? ' done' : ''}`}
+              onClick={() => { if (saveState === 'idle') { haptic(); setSaveState('naming') } }}
+              disabled={saveState === 'saved'}
+            >
+              {saveState === 'saved' ? `✓ ${saveName.trim() || 'Saved'}` : <><IconSave size={16} /> Save</>}
+            </button>
+            <button className="btn-sticky btn-sticky-share" onClick={handleShare} disabled={shareState === 'sharing'}>
+              {shareState === 'done' ? '✓ Shared!' : shareState === 'sharing' ? '…' : <><IconShare size={16} /> Share</>}
+            </button>
+          </>
+        )}
+        </div>
       </div>
     </div>
   )

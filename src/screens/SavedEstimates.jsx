@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { loadEstimates, storeEstimates } from '../storage'
+import { IconSave } from '../icons'
 
 export default function SavedEstimates({ onBack, onView }) {
   const [estimates, setEstimates] = useState([])
@@ -17,7 +18,7 @@ export default function SavedEstimates({ onBack, onView }) {
   return (
     <div className="screen">
       <div className="home-hero">
-        <div className="logo">💾</div>
+        <div className="logo"><IconSave size={26} /></div>
         <h1>Saved Estimates</h1>
         <p>{estimates.length} estimate{estimates.length !== 1 ? 's' : ''} saved</p>
       </div>
@@ -44,10 +45,6 @@ export default function SavedEstimates({ onBack, onView }) {
         ))}
         <div style={{ marginTop: 20 }}>
           <button className="btn-outline" onClick={onBack}>← Back</button>
-        </div>
-        <div className="ad-slot">
-          <span className="ad-label">Ad</span>
-          <p className="ad-text">Your advert here — reach energy-conscious homeowners</p>
         </div>
       </div>
     </div>

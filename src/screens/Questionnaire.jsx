@@ -9,8 +9,11 @@ async function haptic(style = 'LIGHT') {
   } catch {}
 }
 
-export default function Questionnaire({ onComplete, onBack, initialAnswers = {} }) {
-  const [step, setStep] = useState(0)
+// `singleKey` puts the questionnaire in edit-one-answer mode: it opens on
+// that question only, and answering (or backing out) returns to Results.
+export default function Questionnaire({ onComplete, onBack, initialAnswers = {}, singleKey = null }) {
+  const single = singleKey ? Math.max(0, QUESTIONS.findIndex(q => q.key === singleKey)) : null
+  const [step, setStep] = useState(single ?? 0)
   const [answers, setAnswers] = useState(initialAnswers)
   const [numberError, setNumberError] = useState(null)
 
@@ -20,7 +23,8 @@ export default function Questionnaire({ onComplete, onBack, initialAnswers = {} 
   const pct = (step / total) * 100
 
   function advance(nextAnswers) {
-    if (step + 1 < total) setStep(step + 1)
+    if (single != null) onComplete(nextAnswers)
+    else if (step + 1 < total) setStep(step + 1)
     else onComplete(nextAnswers)
   }
 
@@ -50,7 +54,7 @@ export default function Questionnaire({ onComplete, onBack, initialAnswers = {} 
   function goBack() {
     haptic()
     setNumberError(null)
-    if (step === 0) onBack()
+    if (single != null || step === 0) onBack()
     else setStep(step - 1)
   }
 
@@ -60,10 +64,12 @@ export default function Questionnaire({ onComplete, onBack, initialAnswers = {} 
     <div className="screen">
       <div className="screen-header">
         <h1>EPC Estimator</h1>
-        <p className="step-label">Question {step + 1} of {total}</p>
-        <div className="progress-bar">
-          <div className="progress-fill" style={{ width: `${pct}%` }} />
-        </div>
+        <p className="step-label">{single != null ? 'Edit your answer' : `Question ${step + 1} of ${total}`}</p>
+        {single == null && (
+          <div className="progress-bar">
+            <div className="progress-fill" style={{ width: `${pct}%` }} />
+          </div>
+        )}
       </div>
       <div className="screen-body">
         <p className="question-text">{q.text}</p>
@@ -123,12 +129,10 @@ export default function Questionnaire({ onComplete, onBack, initialAnswers = {} 
           </>
         )}
 
+        {/* Choice questions auto-advance on tap — no Next button, just back. */}
         {q.type === 'choice' && (
           <div className="nav-row" style={{ marginTop: 16 }}>
             <button className="btn-back" onClick={goBack}>←</button>
-            <button className="btn-next" onClick={() => advance(answers)} disabled={!val}>
-              {step + 1 === total ? 'See results' : 'Next'}
-            </button>
           </div>
         )}
       </div>

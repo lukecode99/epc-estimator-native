@@ -14,6 +14,9 @@ export default function App() {
   // STORED score/band/cost; after an edit only {id, name} survives so the
   // recomputed result still saves back to the same entry (no duplicates).
   const [viewing, setViewing] = useState(null)
+  // Set when the user taps an input row on Results: the questionnaire opens
+  // on just that question and returns straight to Results.
+  const [editKey, setEditKey] = useState(null)
 
   useEffect(() => {
     if (screen === 'results' || screen === 'saved') showBanner()
@@ -34,12 +37,17 @@ export default function App() {
   if (screen === 'quiz') return (
     <Questionnaire
       initialAnswers={answers}
+      singleKey={editKey}
       onComplete={a => {
         setAnswers(a)
         setViewing(v => (v ? { id: v.id, name: v.name } : null))
+        setEditKey(null)
         goTo('results')
       }}
-      onBack={() => goTo('home')}
+      onBack={() => {
+        if (editKey) { setEditKey(null); goTo('results') }
+        else goTo('home')
+      }}
     />
   )
   if (screen === 'saved') return (
@@ -54,6 +62,7 @@ export default function App() {
       savedEntry={viewing}
       onBack={() => { setViewing(null); goTo('home') }}
       onEdit={() => goTo('quiz')}
+      onEditQuestion={key => { setEditKey(key); goTo('quiz') }}
     />
   )
 }
