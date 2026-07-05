@@ -288,7 +288,7 @@ export default function Results({ answers, savedEntry, onBack, onEdit, onEditQue
 
         <LandlordMees improvements={improvements} score={score} />
 
-        <OfficialEpc estimateScore={score} estimateBand={band.band} />
+        <OfficialEpc estimateScore={score} estimateBand={band.band} initialCert={answers.officialCert || null} />
 
         <div className="inputs-header-row">
           <p className="section-title" style={{ marginTop: 24, marginBottom: 0 }}>Your inputs</p>

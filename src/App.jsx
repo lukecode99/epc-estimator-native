@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Capacitor } from '@capacitor/core'
 import Home from './screens/Home'
+import PostcodeStart from './screens/PostcodeStart'
 import Questionnaire from './screens/Questionnaire'
 import Results from './screens/Results'
 import SavedEstimates from './screens/SavedEstimates'
@@ -8,6 +9,8 @@ import Privacy from './screens/Privacy'
 import BottomNav from './BottomNav'
 import './App.css'
 import { showBanner, hideBanner } from './admob.js'
+import { registerAvailable } from './epcRegister'
+import { FLOOR_AREA_MIN, FLOOR_AREA_MAX } from './sap'
 
 export default function App() {
   const [screen, setScreen] = useState('home')
@@ -49,13 +52,14 @@ export default function App() {
   }
 
   // Start a brand-new estimate: clear any viewed entry, single-question edit
-  // and quiz position before opening the questionnaire.
+  // and quiz position, then open the register-lookup step (EPC-14) — or the
+  // questionnaire directly on builds without a register token.
   function startFreshQuiz() {
     setAnswers({})
     setViewing(null)
     setEditKey(null)
     setQuizStep(0)
-    goTo('quiz')
+    goTo(registerAvailable() ? 'postcode' : 'quiz')
   }
 
   let body
@@ -64,6 +68,27 @@ export default function App() {
     <Home
       onStart={startFreshQuiz}
       onPrivacy={() => goTo('privacy')}
+    />
+  )
+  else if (screen === 'postcode') body = (
+    <PostcodeStart
+      onBack={() => goTo('home')}
+      onContinue={cert => {
+        if (cert) {
+          const area = Number(cert.floorArea)
+          // The official cert rides along inside answers (extra keys survive
+          // the questionnaire's spreads and the saved-entry shape); a sane
+          // official floor area prefills that question.
+          setAnswers(a => ({
+            ...a,
+            officialCert: cert,
+            ...(area >= FLOOR_AREA_MIN && area <= FLOOR_AREA_MAX
+              ? { floorArea: String(Math.round(area)) }
+              : {}),
+          }))
+        }
+        goTo('quiz')
+      }}
     />
   )
   else if (screen === 'quiz') body = (
@@ -115,9 +140,10 @@ export default function App() {
         active={tab}
         aboveBanner={Capacitor.isNativePlatform() && (screen === 'results' || screen === 'saved')}
         onNewTab={() => {
-          // Mid-quiz the tab resumes progress; from anywhere else it starts
-          // a fresh estimate — never reopens a previously viewed result.
-          if (screen === 'quiz') return
+          // Mid-quiz (or on the register step) the tab is already the flow;
+          // from anywhere else it starts a fresh estimate — never reopens a
+          // previously viewed result.
+          if (screen === 'quiz' || screen === 'postcode') return
           if (tab === 'saved' && flowReturn === 'quiz') openFlowTab()
           else startFreshQuiz()
         }}

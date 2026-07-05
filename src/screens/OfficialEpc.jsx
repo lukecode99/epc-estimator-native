@@ -9,13 +9,15 @@ const bandColor = band => (BANDS.find(b => b.band === band) || {}).color || '#9a
 const fmtDate = d => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
 
 // "Compare with the official register" section on the Results screen:
-// postcode → address list → official cert vs our estimate.
-export default function OfficialEpc({ estimateScore, estimateBand }) {
+// postcode → address list → official cert vs our estimate. When the cert
+// was already picked on the pre-quiz register step (EPC-14) it arrives as
+// `initialCert` and the comparison renders directly — no second lookup UI.
+export default function OfficialEpc({ estimateScore, estimateBand, initialCert = null }) {
   const [postcode, setPostcode] = useState('')
-  const [phase, setPhase] = useState('idle') // idle | searching | list | loadingCert | cert
+  const [phase, setPhase] = useState(initialCert ? 'cert' : 'idle') // idle | searching | list | loadingCert | cert
   const [error, setError] = useState(null)
   const [results, setResults] = useState([])
-  const [cert, setCert] = useState(null)
+  const [cert, setCert] = useState(initialCert)
 
   if (!registerAvailable()) return null
 
@@ -58,11 +60,14 @@ export default function OfficialEpc({ estimateScore, estimateBand }) {
   return (
     <div className="official-section">
       <p className="section-title">Official EPC register</p>
-      <p className="official-intro">
-        Homes in England &amp; Wales with a past assessment have an official EPC.
-        Look yours up and compare it with this estimate.
-      </p>
+      {phase !== 'cert' && (
+        <p className="official-intro">
+          Homes in England &amp; Wales with a past assessment have an official EPC.
+          Look yours up and compare it with this estimate.
+        </p>
+      )}
 
+      {phase !== 'cert' && (
       <div className="postcode-row">
         <input
           className="postcode-input"
@@ -82,6 +87,7 @@ export default function OfficialEpc({ estimateScore, estimateBand }) {
           {phase === 'searching' ? '…' : 'Search'}
         </button>
       </div>
+      )}
 
       {error && <p className="input-error">{error}</p>}
 
@@ -155,8 +161,11 @@ export default function OfficialEpc({ estimateScore, estimateBand }) {
               </div>
             )}
           </div>
-          <button className="btn-outline btn-change-address" onClick={() => { setCert(null); setPhase('list') }}>
-            ← Choose a different address
+          <button
+            className="btn-outline btn-change-address"
+            onClick={() => { setCert(null); setPhase(results.length ? 'list' : 'idle') }}
+          >
+            {results.length ? '← Choose a different address' : 'Look up a different address'}
           </button>
         </div>
       )}
