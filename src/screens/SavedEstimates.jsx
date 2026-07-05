@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Capacitor } from '@capacitor/core'
 import { loadEstimates, storeEstimates } from '../storage'
-import { IconSave, IconChevronRight } from '../icons'
+import { IconEpcLadder, IconSave, IconChevronRight } from '../icons'
 
 export default function SavedEstimates({ onStartNew, onView }) {
   const [estimates, setEstimates] = useState([])
@@ -23,7 +23,7 @@ export default function SavedEstimates({ onStartNew, onView }) {
     <div className="screen">
       <div className="home-hero">
         <div className="home-hero-row">
-          <span className="logo"><IconSave size={26} /></span>
+          <span className="logo"><IconEpcLadder size={26} /></span>
           <h1>Saved Estimates</h1>
         </div>
         <p className="saved-hero-count">

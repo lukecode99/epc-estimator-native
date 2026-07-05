@@ -1,11 +1,11 @@
-import { IconHouse, IconBolt, IconChart, IconBulb } from '../icons'
+import { IconEpcLadder, IconBolt, IconChart, IconBulb } from '../icons'
 
 export default function Home({ onStart, onPrivacy }) {
   return (
     <div className="screen">
       <div className="home-hero">
         <div className="home-hero-row">
-          <span className="logo"><IconHouse size={26} /></span>
+          <span className="logo"><IconEpcLadder size={26} /></span>
           <h1>EPC Estimator</h1>
         </div>
       </div>

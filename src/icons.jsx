@@ -20,6 +20,25 @@ function Svg({ size = 20, children, ...rest }) {
   )
 }
 
+// Brand mark: the EPC A–G colour ladder (same art as the app icon). Fixed
+// palette rather than currentColor — it must match the launcher icon.
+const LADDER = ['#008054', '#19b459', '#8dce46', '#ffd500', '#fcaa65', '#ef8023', '#e9153b']
+export const IconEpcLadder = ({ size = 20, ...rest }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true" {...rest}>
+    {LADDER.map((c, i) => {
+      const w = 9 + i * 1.9
+      const y = 0.5 + i * 3.3
+      return (
+        <polygon
+          key={c}
+          points={`1,${y} ${1 + w},${y} ${2.3 + w},${y + 1.25} ${1 + w},${y + 2.5} 1,${y + 2.5}`}
+          fill={c}
+        />
+      )
+    })}
+  </svg>
+)
+
 export const IconHouse = p => (
   <Svg {...p}><path d="M3 10.5 12 3l9 7.5" /><path d="M5 9.5V21h14V9.5" /><path d="M9 21v-6h6v6" /></Svg>
 )
