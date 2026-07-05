@@ -348,6 +348,134 @@ body {
   margin: 6px 0 2px;
 }
 .combined-meta { color: #c6d2e2; }
+.official-section { margin-top: 24px; }
+.official-intro {
+  font-size: 0.85rem;
+  color: #6b7c93;
+  margin: 4px 0 12px;
+}
+.postcode-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.postcode-input {
+  flex: 1;
+  min-width: 0;
+  border: 2px solid #d5dde8;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 1rem;
+  text-transform: uppercase;
+}
+.postcode-input:focus { outline: none; border-color: #2563a8; }
+.btn-postcode {
+  background: #2563a8;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+.btn-postcode:disabled { opacity: 0.5; }
+.official-empty {
+  font-size: 0.85rem;
+  color: #6b7c93;
+  background: #f7f9fc;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.address-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+.address-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  background: #f7f9fc;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+}
+.address-band {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  color: #fff;
+  font-weight: 800;
+  line-height: 26px;
+  text-align: center;
+}
+.address-text { flex: 1; min-width: 0; color: #1a2233; }
+.address-sub {
+  display: block;
+  font-size: 0.75rem;
+  color: #6b7c93;
+}
+.address-go { color: #9aa5b4; font-size: 1.2rem; }
+.official-cert {
+  background: #f7f9fc;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.official-address {
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.expired-flag {
+  color: #c0392b;
+  background: #fdecea;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.compare-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px 8px;
+}
+.compare-lbl {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #6b7c93;
+  text-align: center;
+}
+.compare-band {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 1.4rem;
+  font-weight: 800;
+  line-height: 44px;
+  text-align: center;
+}
+.compare-score { font-size: 0.9rem; font-weight: 700; }
+.btn-change-address { margin-top: 12px; }
 .improvement-gain {
   display: inline-block;
   background: #dbeafe;

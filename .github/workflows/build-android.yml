@@ -25,6 +25,8 @@ jobs:
 
       - name: Build web assets (native)
         run: npm run build:native
+        env:
+          VITE_EPC_API_TOKEN: ${{ secrets.EPC_API_TOKEN }}
 
       - name: Sync Capacitor
         run: npx cap sync android

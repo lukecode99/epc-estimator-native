@@ -2,6 +2,7 @@ import { useState, useRef, Fragment } from 'react'
 import { calculateSAP, getBand, getAnnualCost, getImprovements, combinePlan, HEATING_GROUP } from '../sap'
 import { BANDS, QUESTIONS } from '../data'
 import { loadEstimates, storeEstimates, SAVE_CAP } from '../storage'
+import OfficialEpc from './OfficialEpc'
 
 const WIDTHS = { A: 55, B: 62, C: 70, D: 78, E: 84, F: 90, G: 96 }
 
@@ -228,6 +229,8 @@ export default function Results({ answers, savedEntry, onBack, onEdit }) {
           </div>
         )}
         {saveError && <p className="input-error">{saveError}</p>}
+
+        <OfficialEpc estimateScore={score} estimateBand={band.band} />
 
         <div className="inputs-header-row">
           <p className="section-title" style={{ marginTop: 24, marginBottom: 0 }}>Your inputs</p>
