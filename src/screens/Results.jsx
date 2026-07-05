@@ -1,11 +1,11 @@
-import { useState, useRef, Fragment } from 'react'
+import { useState, useEffect, useRef, Fragment } from 'react'
 import { calculateSAP, getBand, getAnnualCost, getImprovements, combinePlan, parseRange, HEATING_GROUP, PRICE_CAP_BASIS } from '../sap'
 import { BANDS, QUESTIONS } from '../data'
 import { loadEstimates, storeEstimates, SAVE_CAP } from '../storage'
 import OfficialEpc from './OfficialEpc'
 import LandlordMees from './LandlordMees'
 import { grantsFor, quoteUrl, logLinkOut } from '../referrals'
-import { IconSave, IconShare, IconEdit, IconChevronRight, ImprovementIcon } from '../icons'
+import { IconSave, IconShare, IconEdit, IconChevronRight, IconHouse, ImprovementIcon } from '../icons'
 import { Capacitor } from '@capacitor/core'
 
 const WIDTHS = { A: 55, B: 62, C: 70, D: 78, E: 84, F: 90, G: 96 }
@@ -35,7 +35,16 @@ async function haptic(style = 'LIGHT') {
 async function shareAsImage(element, fallbackText) {
   try {
     const html2canvas = (await import('html2canvas')).default
-    const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: '#ffffff' })
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      // The branding footer only appears on the shared image, not in-app.
+      onclone: doc => {
+        const b = doc.querySelector('.share-branding')
+        if (b) b.style.display = 'flex'
+      },
+    })
     const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'))
     const file = new File([blob], 'epc-estimate.png', { type: 'image/png' })
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -91,6 +100,28 @@ export default function Results({ answers, savedEntry, onBack, onEdit, onEditQue
     })
   }
 
+  // Reveal animation: the marker arrow slides down the ladder to the result
+  // band while the score counts up from 0. Replays whenever the score changes.
+  const bandIdx = BANDS.findIndex(b => b.band === band.band)
+  const [displayScore, setDisplayScore] = useState(0)
+  const [markerPlaced, setMarkerPlaced] = useState(false)
+  useEffect(() => {
+    // One frame at the top of the ladder so the CSS top-transition can run.
+    // (Results remounts on every visit, so state starts at 0/unplaced.)
+    const raf1 = requestAnimationFrame(() => setMarkerPlaced(true))
+    const DURATION = 1200
+    let raf, start
+    const tick = now => {
+      if (start == null) start = now
+      const p = Math.min(1, (now - start) / DURATION)
+      const eased = 1 - Math.pow(1 - p, 3)
+      setDisplayScore(Math.round(eased * score))
+      if (p < 1) raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => { cancelAnimationFrame(raf1); cancelAnimationFrame(raf) }
+  }, [score])
+
   const [saveState, setSaveState] = useState('idle') // idle | naming | saved
   const [saveName, setSaveName] = useState(savedEntry?.name || '')
   const [saveError, setSaveError] = useState(null)
@@ -143,11 +174,26 @@ export default function Results({ answers, savedEntry, onBack, onEdit, onEditQue
       </div>
       <div className="results-body">
         <div ref={captureRef} className="capture-zone">
-          <div className="band-display" style={{ background: `linear-gradient(135deg, ${band.color}cc, ${band.color})` }}>
-            <div className="band-letter">{band.band}</div>
-            <div className="band-score">{score} / 100</div>
-            <div className="band-label">{band.label}</div>
+          {/* Certificate-style ladder hero: the marker arrow slides to the
+              result band while the score counts up. */}
+          <div className="cert-ladder" aria-label={`EPC band ${band.band}, score ${score} out of 100`}>
+            {BANDS.map(b => (
+              <div key={b.band} className="cert-rung">
+                <div className="cert-bar" style={{ background: b.color, width: `${Math.round(WIDTHS[b.band] * 0.66)}%` }}>
+                  <span className="cert-range">{b.min}–{b.max}</span>
+                  <span className="cert-letter">{b.band}</span>
+                </div>
+              </div>
+            ))}
+            <div
+              className="cert-marker"
+              style={{ top: (markerPlaced ? bandIdx : 0) * 35, background: band.color }}
+            >
+              <span className="cert-marker-score">{displayScore}</span>
+              <span className="cert-marker-band">{band.band}</span>
+            </div>
           </div>
+          <p className="cert-caption">Band {band.band} — {band.label}</p>
 
           <div className="summary-card">
             <div className="summary-cost-row">
@@ -224,18 +270,13 @@ export default function Results({ answers, savedEntry, onBack, onEdit, onEditQue
               </>
             )}
           </div>
-        </div>
 
-        <p className="section-title">EPC Scale</p>
-        <div className="epc-ladder">
-          {BANDS.map(b => (
-            <div key={b.band} className={`epc-rung${b.band === band.band ? ' current' : ''}`}>
-              <span className="rung-band">{b.band}</span>
-              <div className="rung-bar" style={{ background: b.color, width: `${WIDTHS[b.band]}%` }}>
-                {b.band === band.band ? `◀ ${score}` : `${b.min}–${b.max}`}
-              </div>
-            </div>
-          ))}
+          {/* Hidden in-app; unhidden by shareAsImage's onclone so the shared
+              image carries the app branding. */}
+          <div className="share-branding" aria-hidden="true">
+            <IconHouse size={16} />
+            <span><strong>EPC Estimator</strong> — free EPC band check, on the App Store</span>
+          </div>
         </div>
 
         <div className="action-grid">

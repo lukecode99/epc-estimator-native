@@ -116,3 +116,12 @@ export const QUESTIONS = [
     { label: 'Mostly or all traditional bulbs', value: 'mostly_old' },
   ]},
 ];
+
+// Questionnaire sections: the 16 questions in 4 labelled groups, in
+// QUESTIONS order (each section's keys are contiguous).
+export const SECTIONS = [
+  { label: 'Property', keys: ['propertyType', 'storeys', 'floorArea', 'constructionEra'] },
+  { label: 'Fabric',   keys: ['wallType', 'floorInsulation', 'loftInsulation', 'glazing', 'draughtProofing', 'conservatory'] },
+  { label: 'Heating',  keys: ['heatingType', 'boilerAge', 'heatingControls', 'hotWater'] },
+  { label: 'Extras',   keys: ['solarPV', 'lighting'] },
+]

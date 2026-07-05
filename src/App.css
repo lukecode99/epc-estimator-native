@@ -114,11 +114,17 @@ body {
 }
 .btn-outline:hover { background: #2563a8; color: #fff; }
 
-.progress-bar {
+/* Sectioned questionnaire progress: one labelled segment per section. */
+.section-progress {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+}
+.section-seg { flex: 1; }
+.section-bar {
   background: rgba(255,255,255,0.25);
   border-radius: 99px;
   height: 6px;
-  margin-top: 12px;
   overflow: hidden;
 }
 .progress-fill {
@@ -127,6 +133,24 @@ body {
   border-radius: 99px;
   transition: width 0.3s ease;
 }
+.section-name {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.62rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: #fff;
+  opacity: 0.55;
+  text-align: center;
+}
+.section-seg.active .section-name { opacity: 1; }
+
+/* Subtle slide between questions (remounted via key={step}). */
+.question-pane.slide-fwd  { animation: q-slide-fwd 0.22s ease-out; }
+.question-pane.slide-back { animation: q-slide-back 0.22s ease-out; }
+@keyframes q-slide-fwd  { from { opacity: 0; transform: translateX(26px); }  to { opacity: 1; transform: none; } }
+@keyframes q-slide-back { from { opacity: 0; transform: translateX(-26px); } to { opacity: 1; transform: none; } }
 
 .step-label {
   font-size: 0.8rem;
@@ -212,19 +236,65 @@ body {
 }
 .btn-next:disabled { opacity: 0.4; cursor: default; }
 
-.band-display {
+/* Certificate-style ladder hero (Results reveal) */
+.cert-ladder {
+  position: relative;
   display: flex;
   flex-direction: column;
+  gap: 5px;
+  padding: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+}
+.cert-rung { height: 30px; }
+.cert-bar {
+  position: relative;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px 0 10px;
+  color: #fff;
+  clip-path: polygon(0 0, calc(100% - 11px) 0, 100% 50%, calc(100% - 11px) 100%, 0 100%);
+}
+.cert-range  { font-size: 0.68rem; font-weight: 600; opacity: 0.9; }
+.cert-letter { font-size: 1rem; font-weight: 900; }
+.cert-marker {
+  position: absolute;
+  right: 14px;
+  display: flex;
   align-items: center;
   gap: 6px;
-  padding: 28px;
-  border-radius: 16px;
-  margin-bottom: 20px;
+  height: 30px;
+  padding: 0 12px 0 18px;
+  margin-top: 14px; /* aligns top:0 with the first rung (ladder padding) */
   color: #fff;
+  clip-path: polygon(11px 0, 100% 0, 100% 100%, 11px 100%, 0 50%);
+  transition: top 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 2px 8px rgba(26,34,51,0.25);
 }
-.band-letter { font-size: 5rem; font-weight: 900; line-height: 1; }
-.band-score  { font-size: 1.2rem; font-weight: 700; }
-.band-label  { font-size: 0.9rem; opacity: 0.9; }
+.cert-marker-score { font-size: 1.05rem; font-weight: 900; min-width: 26px; text-align: right; }
+.cert-marker-band  { font-size: 0.8rem; font-weight: 700; opacity: 0.95; }
+.cert-caption {
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1a3a5c;
+  margin: 10px 0 20px;
+}
+
+/* Branding footer for the shared image — hidden in-app, shown via
+   html2canvas onclone. */
+.share-branding {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 12px 0 4px;
+  color: #1a3a5c;
+  font-size: 0.8rem;
+}
 
 .stats-row {
   display: flex;
@@ -249,31 +319,6 @@ body {
   color: #6b7c93;
   margin-bottom: 10px;
 }
-
-.epc-ladder {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-bottom: 20px;
-}
-.epc-rung {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.rung-band { font-weight: 800; font-size: 0.9rem; width: 16px; text-align: center; }
-.rung-bar {
-  height: 22px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  padding: 0 10px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #fff;
-  transition: outline .15s;
-}
-.epc-rung.current .rung-bar { outline: 3px solid #1a2233; outline-offset: 1px; }
 
 .improvement-card {
   background: #f7f9fc;
@@ -303,6 +348,7 @@ body {
   align-items: flex-start;
   gap: 10px;
 }
+.imp-title-row h4 { flex: 1; }
 .imp-icon {
   flex: 0 0 auto;
   display: flex;

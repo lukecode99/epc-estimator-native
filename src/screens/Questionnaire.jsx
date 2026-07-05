@@ -1,6 +1,13 @@
 import { useState } from 'react'
-import { QUESTIONS, FLOOR_PRESETS } from '../data'
+import { QUESTIONS, SECTIONS, FLOOR_PRESETS } from '../data'
 import { FLOOR_AREA_MIN, FLOOR_AREA_MAX } from '../sap'
+
+// Section boundaries as question indices: [{ label, start, len }]
+const SECTION_SPANS = SECTIONS.reduce((acc, s) => {
+  const start = acc.length ? acc[acc.length - 1].start + acc[acc.length - 1].len : 0
+  return [...acc, { label: s.label, start, len: s.keys.length }]
+}, [])
+const sectionAt = step => SECTION_SPANS.findIndex(s => step >= s.start && step < s.start + s.len)
 
 async function haptic(style = 'LIGHT') {
   try {
@@ -16,15 +23,17 @@ export default function Questionnaire({ onComplete, onBack, initialAnswers = {},
   const [step, setStep] = useState(single ?? 0)
   const [answers, setAnswers] = useState(initialAnswers)
   const [numberError, setNumberError] = useState(null)
+  // Slide direction for the transition between questions.
+  const [dir, setDir] = useState('fwd')
 
   const q = QUESTIONS[step]
   const val = answers[q.key]
   const total = QUESTIONS.length
-  const pct = (step / total) * 100
+  const section = SECTION_SPANS[sectionAt(step)]
 
   function advance(nextAnswers) {
     if (single != null) onComplete(nextAnswers)
-    else if (step + 1 < total) setStep(step + 1)
+    else if (step + 1 < total) { setDir('fwd'); setStep(step + 1) }
     else onComplete(nextAnswers)
   }
 
@@ -55,7 +64,7 @@ export default function Questionnaire({ onComplete, onBack, initialAnswers = {},
     haptic()
     setNumberError(null)
     if (single != null || step === 0) onBack()
-    else setStep(step - 1)
+    else { setDir('back'); setStep(step - 1) }
   }
 
   const presets = q.key === 'floorArea' ? (FLOOR_PRESETS[answers.propertyType] || []) : []
@@ -64,14 +73,28 @@ export default function Questionnaire({ onComplete, onBack, initialAnswers = {},
     <div className="screen">
       <div className="screen-header">
         <h1>EPC Estimator</h1>
-        <p className="step-label">{single != null ? 'Edit your answer' : `Question ${step + 1} of ${total}`}</p>
+        <p className="step-label">
+          {single != null ? 'Edit your answer' : `${section.label} · Question ${step + 1} of ${total}`}
+        </p>
         {single == null && (
-          <div className="progress-bar">
-            <div className="progress-fill" style={{ width: `${pct}%` }} />
+          <div className="section-progress">
+            {SECTION_SPANS.map(s => {
+              const fill = Math.min(1, Math.max(0, (step - s.start) / s.len))
+              return (
+                <div key={s.label} className={`section-seg${s === section ? ' active' : ''}`}>
+                  <div className="section-bar">
+                    <div className="progress-fill" style={{ width: `${fill * 100}%` }} />
+                  </div>
+                  <span className="section-name">{s.label}</span>
+                </div>
+              )
+            })}
           </div>
         )}
       </div>
       <div className="screen-body">
+        {/* key={step} remounts the pane so the slide animation replays. */}
+        <div key={step} className={`question-pane slide-${dir}`}>
         <p className="question-text">{q.text}</p>
 
         {q.type === 'choice' && (
@@ -135,6 +158,7 @@ export default function Questionnaire({ onComplete, onBack, initialAnswers = {},
             <button className="btn-back" onClick={goBack}>←</button>
           </div>
         )}
+        </div>
       </div>
     </div>
   )
