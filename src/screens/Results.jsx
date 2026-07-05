@@ -4,7 +4,7 @@ import { BANDS, QUESTIONS } from '../data'
 import { loadEstimates, storeEstimates, SAVE_CAP } from '../storage'
 import OfficialEpc from './OfficialEpc'
 import LandlordMees from './LandlordMees'
-import { grantsFor, quoteUrl, logLinkOut } from '../referrals'
+import { grantsFor } from '../referrals'
 import { IconSave, IconShare, IconEdit, IconChevronRight, IconHouse, ImprovementIcon } from '../icons'
 import { Capacitor } from '@capacitor/core'
 
@@ -241,15 +241,6 @@ export default function Results({ answers, savedEntry, onBack, onEdit, onEditQue
                             <span className="band-chip" style={{ background: bandColor(imp.newBand) }}>{imp.newBand}</span>
                             <span className="band-chip-pts">+{imp.scoreGain} pts · {imp.newScore}/100</span>
                           </span>
-                          <a
-                            className="btn-quotes"
-                            href={quoteUrl(imp.title)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={e => { e.stopPropagation(); logLinkOut(imp.title) }}
-                          >
-                            Get quotes ↗
-                          </a>
                         </div>
                       </div>
                     </Fragment>

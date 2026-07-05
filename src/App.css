@@ -437,16 +437,6 @@ body {
   gap: 8px;
   flex-wrap: wrap;
 }
-.btn-quotes {
-  flex: 0 0 auto;
-  background: #2563a8;
-  color: #fff;
-  text-decoration: none;
-  border-radius: 6px;
-  padding: 4px 10px;
-  font-size: 0.78rem;
-  font-weight: 700;
-}
 .mees-section { margin-top: 24px; }
 .mees-toggle {
   display: flex;
