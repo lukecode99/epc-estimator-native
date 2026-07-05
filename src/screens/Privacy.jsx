@@ -16,7 +16,7 @@ export default function Privacy({ onBack }) {
         <p className="privacy-p">EPC Estimator does not collect, transmit, or store any personal data on external servers. Specifically:</p>
         <ul className="privacy-list">
           <li>All answers you enter during the questionnaire are processed entirely within your browser.</li>
-          <li>If you choose to save an estimate, it is stored only in your browser's local storage (localStorage) on your device. It is never sent to us or any third party.</li>
+          <li>If you choose to save an estimate, it is stored only on your device (in the app's local storage). It is never sent to us or any third party.</li>
           <li>We do not use analytics, tracking pixels, or session recording tools.</li>
           <li>We do not collect names, email addresses, or any personally identifiable information unless you voluntarily provide an email address to receive your estimate by email.</li>
         </ul>
@@ -29,7 +29,7 @@ export default function Privacy({ onBack }) {
         <p className="privacy-p">For more information on how Google uses data, see: <a href="https://policies.google.com/technologies/partner-sites" className="privacy-link" target="_blank" rel="noopener noreferrer">How Google uses data when you use our partners' sites or apps</a>.</p>
 
         <h2 className="privacy-h2">5. Local storage</h2>
-        <p className="privacy-p">We use your browser's localStorage to save estimates you choose to store. This data stays on your device and can be deleted at any time by clearing your browser data or using the delete option within the app.</p>
+        <p className="privacy-p">Estimates you choose to save are stored locally on your device (app storage on iOS/Android, browser localStorage on the web). This data stays on your device and can be deleted at any time using the delete option within the app, or by clearing the app's data.</p>
 
         <h2 className="privacy-h2">6. Third-party links</h2>
         <p className="privacy-p">This app may contain links to external websites. We are not responsible for the privacy practices of those sites.</p>

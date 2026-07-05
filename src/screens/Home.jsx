@@ -1,9 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { loadEstimates } from '../storage'
 
 export default function Home({ onStart, onSaved, onPrivacy }) {
-  const [count] = useState(() => {
-    return JSON.parse(localStorage.getItem('epc_estimates') || '[]').length
-  })
+  const [count, setCount] = useState(0)
+
+  useEffect(() => {
+    loadEstimates().then(list => setCount(list.length))
+  }, [])
 
   return (
     <div className="screen">

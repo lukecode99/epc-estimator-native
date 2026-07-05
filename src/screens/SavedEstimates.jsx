@@ -1,14 +1,17 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { loadEstimates, storeEstimates } from '../storage'
 
 export default function SavedEstimates({ onBack, onView }) {
-  const [estimates, setEstimates] = useState(() => {
-    return JSON.parse(localStorage.getItem('epc_estimates') || '[]')
-  })
+  const [estimates, setEstimates] = useState([])
+
+  useEffect(() => {
+    loadEstimates().then(setEstimates)
+  }, [])
 
   function remove(id) {
     const next = estimates.filter(e => e.id !== id)
-    localStorage.setItem('epc_estimates', JSON.stringify(next))
     setEstimates(next)
+    storeEstimates(next)
   }
 
   return (

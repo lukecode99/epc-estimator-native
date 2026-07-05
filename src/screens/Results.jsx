@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { calculateSAP, getBand, getAnnualCost, getImprovements } from '../sap'
 import { BANDS, QUESTIONS } from '../data'
+import { loadEstimates, storeEstimates, SAVE_CAP } from '../storage'
 
 const WIDTHS = { A: 55, B: 62, C: 70, D: 78, E: 84, F: 90, G: 96 }
 
@@ -55,12 +56,13 @@ export default function Results({ answers, savedEntry, onBack, onEdit }) {
 
   const [saveState, setSaveState] = useState('idle') // idle | naming | saved
   const [saveName, setSaveName] = useState(savedEntry?.name || '')
+  const [saveError, setSaveError] = useState(null)
   const [shareState, setShareState] = useState('idle') // idle | sharing | done
 
-  function confirmSave() {
+  async function confirmSave() {
     haptic('MEDIUM')
     const name = saveName.trim() || 'My Home'
-    const existing = JSON.parse(localStorage.getItem('epc_estimates') || '[]')
+    const existing = await loadEstimates()
     const entry = {
       id: savedEntry?.id ?? Date.now(),
       name,
@@ -69,10 +71,15 @@ export default function Results({ answers, savedEntry, onBack, onEdit }) {
     }
     // Re-saving a viewed/edited estimate updates it in place — no duplicate.
     const idx = existing.findIndex(e => e.id === entry.id)
+    if (idx < 0 && existing.length >= SAVE_CAP) {
+      setSaveError(`You've reached the ${SAVE_CAP} saved estimates limit — delete one from Saved Estimates to make room.`)
+      return
+    }
     const next = idx >= 0
       ? existing.map((e, i) => (i === idx ? entry : e))
-      : [entry, ...existing].slice(0, 20)
-    localStorage.setItem('epc_estimates', JSON.stringify(next))
+      : [entry, ...existing]
+    await storeEstimates(next)
+    setSaveError(null)
     setSaveState('saved')
   }
 
@@ -173,6 +180,7 @@ export default function Results({ answers, savedEntry, onBack, onEdit }) {
             <button className="btn-save-confirm" onClick={confirmSave}>Save</button>
           </div>
         )}
+        {saveError && <p className="input-error">{saveError}</p>}
 
         <div className="inputs-header-row">
           <p className="section-title" style={{ marginTop: 24, marginBottom: 0 }}>Your inputs</p>
