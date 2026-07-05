@@ -63,7 +63,7 @@ async function shareAsImage(element, fallbackText) {
   try { await navigator.clipboard.writeText(fallbackText) } catch {}
 }
 
-export default function Results({ answers, savedEntry, onBack, onEdit, onEditQuestion }) {
+export default function Results({ answers, savedEntry, onBack, onEdit, onEditQuestion, onOpenSaved }) {
   // A viewed saved estimate shows exactly what was stored — score, band,
   // cost and improvements are NOT recomputed (the model may have changed
   // since it was saved). A live/edited result computes fresh.
@@ -323,6 +323,12 @@ export default function Results({ answers, savedEntry, onBack, onEdit, onEditQue
           screen at all times. Sits above the AdMob banner on native. */}
       <div className={`sticky-actions${Capacitor.isNativePlatform() ? ' above-banner' : ''}`}>
         {saveError && <p className="input-error sticky-error">{saveError}</p>}
+        {saveState === 'saved' && (
+          <p className="save-confirm-strip">
+            ✓ “{saveName.trim() || 'My Home'}” saved
+            <button className="btn-open-saved" onClick={onOpenSaved}>Open Saved →</button>
+          </p>
+        )}
         <div className="sticky-actions-row">
         {saveState === 'naming' ? (
           <div className="save-name-row">
@@ -344,7 +350,7 @@ export default function Results({ answers, savedEntry, onBack, onEdit, onEditQue
               onClick={() => { if (saveState === 'idle') { haptic(); setSaveState('naming') } }}
               disabled={saveState === 'saved'}
             >
-              {saveState === 'saved' ? `✓ ${saveName.trim() || 'Saved'}` : <><IconSave size={16} /> Save</>}
+              {saveState === 'saved' ? '✓ Saved' : <><IconSave size={16} /> Save</>}
             </button>
             <button className="btn-sticky btn-sticky-share" onClick={handleShare} disabled={shareState === 'sharing'}>
               {shareState === 'done' ? '✓ Shared!' : shareState === 'sharing' ? '…' : <><IconShare size={16} /> Share</>}

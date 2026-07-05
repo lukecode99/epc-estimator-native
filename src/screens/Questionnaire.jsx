@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { QUESTIONS, SECTIONS, FLOOR_PRESETS } from '../data'
 import { FLOOR_AREA_MIN, FLOOR_AREA_MAX } from '../sap'
 
@@ -18,10 +18,16 @@ async function haptic(style = 'LIGHT') {
 
 // `singleKey` puts the questionnaire in edit-one-answer mode: it opens on
 // that question only, and answering (or backing out) returns to Results.
-export default function Questionnaire({ onComplete, onBack, initialAnswers = {}, singleKey = null }) {
+// `initialStep` + `onProgress` let App keep live progress, so switching to
+// the Saved tab mid-quiz and back resumes at the same question (EPC-10).
+export default function Questionnaire({ onComplete, onBack, initialAnswers = {}, singleKey = null, initialStep = 0, onProgress = null }) {
   const single = singleKey ? Math.max(0, QUESTIONS.findIndex(q => q.key === singleKey)) : null
-  const [step, setStep] = useState(single ?? 0)
+  const [step, setStep] = useState(single ?? Math.min(initialStep, QUESTIONS.length - 1))
   const [answers, setAnswers] = useState(initialAnswers)
+
+  useEffect(() => {
+    if (onProgress && single == null) onProgress(answers, step)
+  }, [answers, step]) // eslint-disable-line react-hooks/exhaustive-deps
   const [numberError, setNumberError] = useState(null)
   // Slide direction for the transition between questions.
   const [dir, setDir] = useState('fwd')

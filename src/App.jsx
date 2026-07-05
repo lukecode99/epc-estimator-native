@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
+import { Capacitor } from '@capacitor/core'
 import Home from './screens/Home'
 import Questionnaire from './screens/Questionnaire'
 import Results from './screens/Results'
 import SavedEstimates from './screens/SavedEstimates'
 import Privacy from './screens/Privacy'
+import BottomNav from './BottomNav'
 import './App.css'
 import { showBanner, hideBanner } from './admob.js'
 
@@ -17,27 +19,49 @@ export default function App() {
   // Set when the user taps an input row on Results: the questionnaire opens
   // on just that question and returns straight to Results.
   const [editKey, setEditKey] = useState(null)
+  // Which bottom-nav tab owns the current screen. Results reached from the
+  // Saved list stays under the Saved tab; everything else is the flow.
+  const [tab, setTab] = useState('new')
+  // Where the estimate flow was left when the user switched to the Saved
+  // tab, so tabbing back resumes (mid-questionnaire included) rather than
+  // restarting.
+  const [flowReturn, setFlowReturn] = useState('home')
+  // Live questionnaire position — a tab switch mid-quiz keeps the answers
+  // (synced via onProgress) and this step, so the quiz picks up where it was.
+  const [quizStep, setQuizStep] = useState(0)
 
   useEffect(() => {
     if (screen === 'results' || screen === 'saved') showBanner()
     else hideBanner()
   }, [screen])
 
-  function goTo(s) { setScreen(s) }
+  function goTo(s) { setScreen(s); setTab('new') }
 
-  if (screen === 'privacy') return <Privacy onBack={() => goTo('home')} />
+  function openSavedTab() {
+    if (tab === 'new') setFlowReturn(screen)
+    setTab('saved')
+    setScreen('saved')
+  }
 
-  if (screen === 'home') return (
+  function openFlowTab() {
+    setTab('new')
+    setScreen(flowReturn)
+  }
+
+  let body
+  if (screen === 'privacy') body = <Privacy onBack={() => goTo('home')} />
+  else if (screen === 'home') body = (
     <Home
-      onStart={() => { setAnswers({}); setViewing(null); goTo('quiz') }}
-      onSaved={() => goTo('saved')}
+      onStart={() => { setAnswers({}); setViewing(null); setEditKey(null); setQuizStep(0); goTo('quiz') }}
       onPrivacy={() => goTo('privacy')}
     />
   )
-  if (screen === 'quiz') return (
+  else if (screen === 'quiz') body = (
     <Questionnaire
       initialAnswers={answers}
+      initialStep={quizStep}
       singleKey={editKey}
+      onProgress={(a, s) => { setAnswers(a); setQuizStep(s) }}
       onComplete={a => {
         setAnswers(a)
         setViewing(v => (v ? { id: v.id, name: v.name } : null))
@@ -50,19 +74,39 @@ export default function App() {
       }}
     />
   )
-  if (screen === 'saved') return (
+  else if (screen === 'saved') body = (
     <SavedEstimates
-      onBack={() => goTo('home')}
-      onView={entry => { setAnswers(entry.answers); setViewing(entry); goTo('results') }}
+      onStartNew={() => { setAnswers({}); setViewing(null); setEditKey(null); setQuizStep(0); goTo('quiz') }}
+      onView={entry => {
+        setAnswers(entry.answers)
+        setViewing(entry)
+        setEditKey(null)
+        // The viewed estimate becomes the current flow context.
+        setFlowReturn('results')
+        setScreen('results')
+      }}
     />
   )
-  return (
+  else body = (
     <Results
       answers={answers}
       savedEntry={viewing}
       onBack={() => { setViewing(null); goTo('home') }}
-      onEdit={() => goTo('quiz')}
+      onEdit={() => { setQuizStep(0); goTo('quiz') }}
       onEditQuestion={key => { setEditKey(key); goTo('quiz') }}
+      onOpenSaved={openSavedTab}
     />
+  )
+
+  return (
+    <>
+      {body}
+      <BottomNav
+        active={tab}
+        aboveBanner={Capacitor.isNativePlatform() && (screen === 'results' || screen === 'saved')}
+        onNewTab={() => { if (tab !== 'new') openFlowTab() }}
+        onSavedTab={() => { if (screen !== 'saved') openSavedTab() }}
+      />
+    </>
   )
 }

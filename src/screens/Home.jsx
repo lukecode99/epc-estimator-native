@@ -1,14 +1,6 @@
-import { useState, useEffect } from 'react'
-import { loadEstimates } from '../storage'
-import { IconHouse, IconSave, IconBolt, IconChart, IconBulb } from '../icons'
+import { IconHouse, IconBolt, IconChart, IconBulb } from '../icons'
 
-export default function Home({ onStart, onSaved, onPrivacy }) {
-  const [count, setCount] = useState(0)
-
-  useEffect(() => {
-    loadEstimates().then(list => setCount(list.length))
-  }, [])
-
+export default function Home({ onStart, onPrivacy }) {
   return (
     <div className="screen">
       <div className="home-hero">
@@ -46,11 +38,6 @@ export default function Home({ onStart, onSaved, onPrivacy }) {
         <button className="btn-primary" onClick={onStart}>
           Start free estimate →
         </button>
-        {count > 0 && (
-          <button className="btn-outline" onClick={onSaved}>
-            <IconSave size={16} /> View saved estimates ({count})
-          </button>
-        )}
         <p style={{ fontSize: '0.75rem', color: '#9aa5b4', textAlign: 'center', marginTop: 12 }}>
           No personal data collected. Results are estimates only.{' '}
           <button onClick={onPrivacy} className="privacy-link-btn">Privacy Policy</button>
