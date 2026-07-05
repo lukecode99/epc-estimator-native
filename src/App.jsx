@@ -48,11 +48,21 @@ export default function App() {
     setScreen(flowReturn)
   }
 
+  // Start a brand-new estimate: clear any viewed entry, single-question edit
+  // and quiz position before opening the questionnaire.
+  function startFreshQuiz() {
+    setAnswers({})
+    setViewing(null)
+    setEditKey(null)
+    setQuizStep(0)
+    goTo('quiz')
+  }
+
   let body
   if (screen === 'privacy') body = <Privacy onBack={() => goTo('home')} />
   else if (screen === 'home') body = (
     <Home
-      onStart={() => { setAnswers({}); setViewing(null); setEditKey(null); setQuizStep(0); goTo('quiz') }}
+      onStart={startFreshQuiz}
       onPrivacy={() => goTo('privacy')}
     />
   )
@@ -76,7 +86,7 @@ export default function App() {
   )
   else if (screen === 'saved') body = (
     <SavedEstimates
-      onStartNew={() => { setAnswers({}); setViewing(null); setEditKey(null); setQuizStep(0); goTo('quiz') }}
+      onStartNew={startFreshQuiz}
       onView={entry => {
         setAnswers(entry.answers)
         setViewing(entry)
@@ -104,7 +114,13 @@ export default function App() {
       <BottomNav
         active={tab}
         aboveBanner={Capacitor.isNativePlatform() && (screen === 'results' || screen === 'saved')}
-        onNewTab={() => { if (tab !== 'new') openFlowTab() }}
+        onNewTab={() => {
+          // Mid-quiz the tab resumes progress; from anywhere else it starts
+          // a fresh estimate — never reopens a previously viewed result.
+          if (screen === 'quiz') return
+          if (tab === 'saved' && flowReturn === 'quiz') openFlowTab()
+          else startFreshQuiz()
+        }}
         onSavedTab={() => { if (screen !== 'saved') openSavedTab() }}
       />
     </>
