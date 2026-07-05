@@ -37,6 +37,19 @@ export default function Questionnaire({ onComplete, onBack, initialAnswers = {},
   const total = QUESTIONS.length
   const section = SECTION_SPANS[sectionAt(step)]
 
+  // EPC-17: when the floor area came from the register cert, say so. Keyed
+  // off the same 15–500 m² condition App.jsx uses to prefill — a cert with
+  // an out-of-range floor area deliberately doesn't prefill, so no note.
+  const cert = answers.officialCert
+  const certArea = cert ? Number(cert.floorArea) : NaN
+  const certDate = cert && cert.registrationDate ? new Date(cert.registrationDate) : null
+  const floorPrefillNote =
+    q.key === 'floorArea' &&
+    certArea >= FLOOR_AREA_MIN && certArea <= FLOOR_AREA_MAX &&
+    certDate && !isNaN(certDate)
+      ? `Floor space retrieved from your previous EPC on ${certDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })} — adjust this if it has changed`
+      : null
+
   function advance(nextAnswers) {
     if (single != null) onComplete(nextAnswers)
     else if (step + 1 < total) { setDir('fwd'); setStep(step + 1) }
@@ -148,6 +161,7 @@ export default function Questionnaire({ onComplete, onBack, initialAnswers = {},
               />
               <span className="number-unit">{q.unit}</span>
             </div>
+            {floorPrefillNote && <p className="prefill-note">{floorPrefillNote}</p>}
             {numberError && <p className="input-error">{numberError}</p>}
             <div className="nav-row">
               <button className="btn-back" onClick={goBack}>←</button>

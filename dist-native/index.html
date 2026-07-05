@@ -3,11 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!-- maximum-scale kills iOS input-focus auto-zoom, which otherwise leaves
+         the app panned sideways after the save-name input (EPC-16). Fine in a
+         Capacitor-wrapped app where pinch-zoom isn't expected. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#1a3a5c" />
   <title>EPC Estimator</title>
-    <script type="module" crossorigin src="/assets/index-DPjR-qHV.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-7cBcEZZX.css">
+    <script type="module" crossorigin src="/assets/index-aPPFJVRA.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-BEODez7j.css">
   <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
   <body>
     <div id="root"></div>

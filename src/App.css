@@ -208,6 +208,12 @@ body {
   font-size: 0.9rem;
   margin: 0 0 12px;
 }
+.prefill-note {
+  color: #6b7c93;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  margin: 0 0 12px;
+}
 
 .nav-row {
   display: flex;
@@ -831,7 +837,7 @@ body {
   border: 2px solid #2563a8;
   border-radius: 10px;
   padding: 12px 14px;
-  font-size: 0.9rem;
+  font-size: 1rem; /* ≥16px — anything smaller triggers iOS focus auto-zoom (EPC-16) */
   outline: none;
 }
 .btn-save-confirm {
