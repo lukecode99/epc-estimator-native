@@ -1,5 +1,5 @@
 import { useState, useRef, Fragment } from 'react'
-import { calculateSAP, getBand, getAnnualCost, getImprovements, combinePlan, HEATING_GROUP } from '../sap'
+import { calculateSAP, getBand, getAnnualCost, getImprovements, combinePlan, HEATING_GROUP, PRICE_CAP_BASIS } from '../sap'
 import { BANDS, QUESTIONS } from '../data'
 import { loadEstimates, storeEstimates, SAVE_CAP } from '../storage'
 import OfficialEpc from './OfficialEpc'
@@ -53,6 +53,9 @@ export default function Results({ answers, savedEntry, onBack, onEdit }) {
     ? BANDS.find(b => b.band === savedEntry.band) || getBand(score)
     : getBand(score)
   const cost = isStored ? savedEntry.cost : getAnnualCost(answers)
+  // A stored estimate keeps the cap period its cost was computed under;
+  // older saves without one fall back to the current basis.
+  const capBasis = (isStored && savedEntry.capBasis) || PRICE_CAP_BASIS
   const improvements = isStored ? savedEntry.improvements || [] : getImprovements(answers, score)
 
   const captureRef = useRef(null)
@@ -90,7 +93,7 @@ export default function Results({ answers, savedEntry, onBack, onEdit }) {
       id: savedEntry?.id ?? Date.now(),
       name,
       date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
-      answers, score, band: band.band, bandColor: band.color, cost, improvements,
+      answers, score, band: band.band, bandColor: band.color, cost, capBasis, improvements,
     }
     // Re-saving a viewed/edited estimate updates it in place — no duplicate.
     const idx = existing.findIndex(e => e.id === entry.id)
@@ -140,6 +143,7 @@ export default function Results({ answers, savedEntry, onBack, onEdit }) {
               <span className="summary-cost-val">£{cost.toLocaleString()}</span>
               <span className="summary-cost-lbl">est. annual energy cost</span>
             </div>
+            <p className="summary-cap-note">Based on the {capBasis} energy price cap</p>
             {improvements.length > 0 && (
               <>
                 <div className="summary-divider" />

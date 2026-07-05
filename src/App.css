@@ -807,6 +807,11 @@ body {
   font-size: 0.8rem;
   color: #6b7c93;
 }
+.summary-cap-note {
+  font-size: 0.72rem;
+  color: #8a99ad;
+  margin: 4px 0 0;
+}
 .summary-divider {
   height: 1px;
   background: #e2e8f0;
