@@ -4,6 +4,7 @@ import { BANDS, QUESTIONS } from '../data'
 import { loadEstimates, storeEstimates, SAVE_CAP } from '../storage'
 import OfficialEpc from './OfficialEpc'
 import LandlordMees from './LandlordMees'
+import { grantsFor, quoteUrl, logLinkOut } from '../referrals'
 
 const WIDTHS = { A: 55, B: 62, C: 70, D: 78, E: 84, F: 90, G: 96 }
 
@@ -158,14 +159,32 @@ export default function Results({ answers, savedEntry, onBack, onEdit }) {
                           <h4>{imp.title}</h4>
                           <span className={`imp-check${checked ? ' on' : ''}`} aria-hidden="true">{checked ? '✓' : ''}</span>
                         </div>
+                        {grantsFor(imp.title).length > 0 && (
+                          <div className="grant-badges">
+                            {grantsFor(imp.title).map(g => (
+                              <span key={g.id} className={`grant-badge grant-${g.id.toLowerCase()}`}>{g.label}</span>
+                            ))}
+                          </div>
+                        )}
                         {imp.note && <p className="imp-note">{imp.note}</p>}
                         <div className="improvement-meta">
                           <span>Cost: {imp.cost}</span>
                           <span>Saving: {imp.saving}</span>
                         </div>
-                        <span className="improvement-gain">
-                          Could reach band {imp.newBand} ({imp.newScore}/100) ↑ +{imp.scoreGain} pts
-                        </span>
+                        <div className="imp-actions-row">
+                          <span className="improvement-gain">
+                            Could reach band {imp.newBand} ({imp.newScore}/100) ↑ +{imp.scoreGain} pts
+                          </span>
+                          <a
+                            className="btn-quotes"
+                            href={quoteUrl(imp.title)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={e => { e.stopPropagation(); logLinkOut(imp.title) }}
+                          >
+                            Get quotes ↗
+                          </a>
+                        </div>
                       </div>
                     </Fragment>
                   )

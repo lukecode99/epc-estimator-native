@@ -348,6 +348,39 @@ body {
   margin: 6px 0 2px;
 }
 .combined-meta { color: #c6d2e2; }
+.grant-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 6px 0 2px;
+}
+.grant-badge {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  border-radius: 6px;
+  padding: 2px 8px;
+}
+.grant-bus { background: #e8f6ee; color: #1e7a45; }
+.grant-eco4 { background: #eef2ff; color: #4338ca; }
+.grant-gbis { background: #fef5e7; color: #b9770e; }
+.imp-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.btn-quotes {
+  flex: 0 0 auto;
+  background: #2563a8;
+  color: #fff;
+  text-decoration: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
 .mees-section { margin-top: 24px; }
 .mees-toggle {
   display: flex;

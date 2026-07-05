@@ -62,3 +62,21 @@ export async function storeEstimates(list) {
   if (prefs) await prefs.set({ key: KEY, value: json })
   else localStorage.setItem(KEY, json)
 }
+
+// Generic key/value on the same backing store (Preferences on native,
+// localStorage on web) for other features — no migration logic.
+export async function kvGet(key) {
+  const prefs = await getPrefs()
+  if (prefs) return (await prefs.get({ key })).value
+  try {
+    return localStorage.getItem(key)
+  } catch {
+    return null
+  }
+}
+
+export async function kvSet(key, value) {
+  const prefs = await getPrefs()
+  if (prefs) await prefs.set({ key, value })
+  else localStorage.setItem(key, value)
+}
