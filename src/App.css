@@ -348,6 +348,105 @@ body {
   margin: 6px 0 2px;
 }
 .combined-meta { color: #c6d2e2; }
+.mees-section { margin-top: 24px; }
+.mees-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  background: #f7f9fc;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.mees-toggle-text {
+  flex: 1;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1a2233;
+}
+.mees-toggle-sub {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: #6b7c93;
+  margin-top: 2px;
+}
+.mees-toggle-chevron { color: #9aa5b4; font-size: 1.1rem; }
+.mees-body { padding: 12px 4px 0; }
+.mees-status {
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.mees-status.ok { background: #e8f6ee; color: #1e7a45; }
+.mees-status.fail { background: #fdecea; color: #c0392b; }
+.mees-status.warn { background: #fef5e7; color: #b9770e; }
+.mees-route {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.mees-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f7f9fc;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+}
+.mees-step-num {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #2563a8;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.8rem;
+  line-height: 24px;
+  text-align: center;
+}
+.mees-step-text { flex: 1; min-width: 0; color: #1a2233; font-weight: 600; }
+.mees-step-sub {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #6b7c93;
+}
+.mees-step-cum {
+  flex: 0 0 auto;
+  text-align: right;
+  font-weight: 700;
+  color: #1a2233;
+}
+.mees-step-band {
+  display: block;
+  font-size: 0.72rem;
+  color: #6b7c93;
+}
+.mees-step-band.hit { color: #1e7a45; font-weight: 700; }
+.mees-step-e {
+  display: block;
+  font-size: 0.7rem;
+  color: #1e7a45;
+  font-weight: 700;
+}
+.mees-total {
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-top: 10px;
+}
+.mees-short { color: #b9770e; font-weight: 600; }
+.mees-disclaimer {
+  font-size: 0.75rem;
+  color: #6b7c93;
+  margin-top: 12px;
+}
 .official-section { margin-top: 24px; }
 .official-intro {
   font-size: 0.85rem;

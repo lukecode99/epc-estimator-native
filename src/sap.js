@@ -124,6 +124,39 @@ export function combinePlan(improvements, selectedTitles, score) {
 // them as either/or.
 export const HEATING_GROUP = 'heating';
 
+// MEES (Minimum Energy Efficiency Standard) thresholds for rented homes:
+// band E is the current legal minimum to let; band C is the proposed
+// standard for around 2030.
+export const MEES_E_MIN = BANDS.find(b => b.band === 'E').min;
+export const MEES_C_MIN = BANDS.find(b => b.band === 'C').min;
+
+// Greedy cheapest route from `score` to `target`: spend the fewest pounds
+// per point first (midpoint of the cost range / score gain), taking at most
+// one of the heating alternatives. Steps carry the cumulative score/band so
+// the UI can show where each threshold is crossed.
+export function cheapestRoute(improvements, score, target) {
+  const heatingOf = i => i.group || (/boiler|heat pump/i.test(i.title) ? HEATING_GROUP : null);
+  const perPoint = i => {
+    const [lo, hi] = parseRange(i.cost);
+    return ((lo + hi) / 2) / Math.max(1, i.scoreGain);
+  };
+  const pool = [...improvements].sort((a, b) => perPoint(a) - perPoint(b));
+  const steps = [];
+  let cum = score, usedHeating = false, costLow = 0, costHigh = 0;
+  for (const i of pool) {
+    if (cum >= target) break;
+    if (heatingOf(i) === HEATING_GROUP) {
+      if (usedHeating) continue;
+      usedHeating = true;
+    }
+    const [cl, ch] = parseRange(i.cost);
+    costLow += cl; costHigh += ch;
+    cum = Math.min(100, cum + i.scoreGain);
+    steps.push({ ...i, cumScore: cum, cumBand: getBand(cum).band });
+  }
+  return { steps, reached: cum >= target, finalScore: cum, costLow, costHigh };
+}
+
 export function getImprovements(a, score) {
   const list = [];
 

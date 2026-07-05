@@ -3,6 +3,7 @@ import { calculateSAP, getBand, getAnnualCost, getImprovements, combinePlan, HEA
 import { BANDS, QUESTIONS } from '../data'
 import { loadEstimates, storeEstimates, SAVE_CAP } from '../storage'
 import OfficialEpc from './OfficialEpc'
+import LandlordMees from './LandlordMees'
 
 const WIDTHS = { A: 55, B: 62, C: 70, D: 78, E: 84, F: 90, G: 96 }
 
@@ -229,6 +230,8 @@ export default function Results({ answers, savedEntry, onBack, onEdit }) {
           </div>
         )}
         {saveError && <p className="input-error">{saveError}</p>}
+
+        <LandlordMees improvements={improvements} score={score} />
 
         <OfficialEpc estimateScore={score} estimateBand={band.band} />
 
