@@ -288,6 +288,66 @@ body {
   font-size: 0.8rem;
   color: #6b7c93;
 }
+.improvement-card.selected {
+  background: #eaf3fd;
+  border-left-color: #1d4ed8;
+  outline: 2px solid #2563a8;
+  outline-offset: -2px;
+}
+.imp-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+.imp-check {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 2px solid #b8c4d4;
+  background: #fff;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 800;
+  line-height: 18px;
+  text-align: center;
+}
+.imp-check.on {
+  background: #2563a8;
+  border-color: #2563a8;
+}
+.imp-note {
+  margin-top: 6px;
+  font-size: 0.78rem;
+  color: #8a6d1a;
+  background: #fdf6e3;
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+.or-chip {
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #6b7c93;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 2px 0 10px;
+}
+.combined-card {
+  background: #1a2233;
+  color: #fff;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-top: 4px;
+}
+.combined-card h4 { font-size: 0.9rem; font-weight: 700; opacity: 0.85; }
+.combined-line {
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin: 6px 0 2px;
+}
+.combined-meta { color: #c6d2e2; }
 .improvement-gain {
   display: inline-block;
   background: #dbeafe;

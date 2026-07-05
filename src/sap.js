@@ -87,6 +87,43 @@ export function getAnnualCost(a) {
   return Math.round(cost / 50) * 50;
 }
 
+// Pull the low/high numbers out of a display range like '£4,000–£14,000'
+// or '£200–£350/yr'. Works on stored (pre-EPC-3) improvements too, which
+// only carry the display strings.
+export function parseRange(str) {
+  const nums = (String(str).match(/[\d,]+/g) || [])
+    .map(s => parseInt(s.replace(/,/g, ''), 10))
+    .filter(Number.isFinite);
+  if (!nums.length) return [0, 0];
+  return [nums[0], nums[nums.length - 1]];
+}
+
+// Combine a set of ticked improvements into one outcome: a single new
+// score/band plus summed cost and saving ranges.
+export function combinePlan(improvements, selectedTitles, score) {
+  const sel = improvements.filter(i => selectedTitles.includes(i.title));
+  if (!sel.length) return null;
+  let costLow = 0, costHigh = 0, savingLow = 0, savingHigh = 0, gain = 0;
+  for (const i of sel) {
+    const [cl, ch] = parseRange(i.cost);
+    const [sl, sh] = parseRange(i.saving);
+    costLow += cl; costHigh += ch; savingLow += sl; savingHigh += sh;
+    gain += i.scoreGain;
+  }
+  const newScore = Math.min(100, score + gain);
+  return {
+    count: sel.length,
+    newScore,
+    newBand: getBand(newScore).band,
+    costLow, costHigh, savingLow, savingHigh,
+  };
+}
+
+// Boiler replacement and a heat pump are alternative heating upgrades —
+// doing both makes no sense, so they share a group and the UI treats
+// them as either/or.
+export const HEATING_GROUP = 'heating';
+
 export function getImprovements(a, score) {
   const list = [];
 
@@ -115,10 +152,15 @@ export function getImprovements(a, score) {
     list.push({ title: 'LED lighting throughout', cost: '£50–£200', saving: '£40–£80/yr', scoreGain: a.lighting === 'mostly_old' ? 5 : 2 });
 
   if (a.heatingType === 'gas' && (a.boilerAge === 'over15' || a.boilerAge === '10_15'))
-    list.push({ title: 'Replace boiler (A-rated condensing)', cost: '£2,500–£4,000', saving: '£200–£350/yr', scoreGain: 6 });
+    list.push({ title: 'Replace boiler (A-rated condensing)', cost: '£2,500–£4,000', saving: '£200–£350/yr', scoreGain: 6, group: HEATING_GROUP });
 
   if (a.heatingType !== 'heatpump')
-    list.push({ title: 'Air source heat pump', cost: '£7,000–£13,000', saving: '£500–£900/yr', scoreGain: 12 });
+    list.push({
+      title: 'Air source heat pump', cost: '£7,000–£13,000', saving: '£500–£900/yr', scoreGain: 12, group: HEATING_GROUP,
+      ...(a.boilerAge === 'under5'
+        ? { note: 'Your boiler is nearly new — a heat pump is a long-term option to plan for, not an urgent swap.' }
+        : {}),
+    });
 
   if (a.solarPV === 'none')
     list.push({ title: 'Solar PV panels (4kW system)', cost: '£5,000–£8,000', saving: '£300–£600/yr', scoreGain: 14 });
@@ -127,5 +169,18 @@ export function getImprovements(a, score) {
     list.push({ title: 'Solar thermal hot water', cost: '£3,000–£5,000', saving: '£100–£200/yr', scoreGain: 4 });
 
   list.sort((a, b) => b.scoreGain - a.scoreGain);
-  return list.slice(0, 5).map(i => ({ ...i, newScore: Math.min(100, score + i.scoreGain), newBand: getBand(Math.min(100, score + i.scoreGain)).band }));
+  const top = list.slice(0, 5);
+
+  // Keep the two heating alternatives adjacent so the UI can join them
+  // with an explicit "or" instead of listing them as independent peers.
+  const heating = top.filter(i => i.group === HEATING_GROUP);
+  if (heating.length === 2) {
+    const rest = top.filter(i => i.group !== HEATING_GROUP);
+    const at = top.indexOf(heating[0]);
+    rest.splice(at, 0, ...heating);
+    top.length = 0;
+    top.push(...rest);
+  }
+
+  return top.map(i => ({ ...i, newScore: Math.min(100, score + i.scoreGain), newBand: getBand(Math.min(100, score + i.scoreGain)).band }));
 }

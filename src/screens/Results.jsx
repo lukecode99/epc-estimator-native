@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react'
-import { calculateSAP, getBand, getAnnualCost, getImprovements } from '../sap'
+import { useState, useRef, Fragment } from 'react'
+import { calculateSAP, getBand, getAnnualCost, getImprovements, combinePlan, HEATING_GROUP } from '../sap'
 import { BANDS, QUESTIONS } from '../data'
 import { loadEstimates, storeEstimates, SAVE_CAP } from '../storage'
 
@@ -53,6 +53,26 @@ export default function Results({ answers, savedEntry, onBack, onEdit }) {
   const improvements = isStored ? savedEntry.improvements || [] : getImprovements(answers, score)
 
   const captureRef = useRef(null)
+
+  // Ticked improvement titles → one combined outcome (band/score/cost/saving).
+  const [selected, setSelected] = useState([])
+  // Stored (pre-EPC-3) improvements have no group field — infer the heating
+  // group from the title so the either/or rule still holds on saved views.
+  const groupOf = i => i.group || (/boiler|heat pump/i.test(i.title) ? HEATING_GROUP : null)
+  const plan = combinePlan(improvements, selected, score)
+
+  function toggleImprovement(imp) {
+    haptic()
+    const g = groupOf(imp)
+    setSelected(sel => {
+      if (sel.includes(imp.title)) return sel.filter(t => t !== imp.title)
+      // Alternatives (boiler replace vs heat pump): picking one unpicks the other.
+      const rest = g
+        ? sel.filter(t => !improvements.some(o => o.title === t && groupOf(o) === g))
+        : sel
+      return [...rest, imp.title]
+    })
+  }
 
   const [saveState, setSaveState] = useState('idle') // idle | naming | saved
   const [saveName, setSaveName] = useState(savedEntry?.name || '')
@@ -120,19 +140,46 @@ export default function Results({ answers, savedEntry, onBack, onEdit }) {
             {improvements.length > 0 && (
               <>
                 <div className="summary-divider" />
-                <p className="section-title" style={{ marginBottom: 10 }}>Top improvements</p>
-                {improvements.map((imp, i) => (
-                  <div className="improvement-card" key={i}>
-                    <h4>{imp.title}</h4>
-                    <div className="improvement-meta">
-                      <span>Cost: {imp.cost}</span>
-                      <span>Saving: {imp.saving}</span>
+                <p className="section-title" style={{ marginBottom: 10 }}>Top improvements — tap to build a plan</p>
+                {improvements.map((imp, i) => {
+                  const checked = selected.includes(imp.title)
+                  const prev = improvements[i - 1]
+                  const isOrJoined = prev && groupOf(imp) === HEATING_GROUP && groupOf(prev) === HEATING_GROUP
+                  return (
+                    <Fragment key={imp.title}>
+                      {isOrJoined && <div className="or-chip">or — pick one</div>}
+                      <div
+                        className={`improvement-card${checked ? ' selected' : ''}`}
+                        onClick={() => toggleImprovement(imp)}
+                      >
+                        <div className="imp-title-row">
+                          <h4>{imp.title}</h4>
+                          <span className={`imp-check${checked ? ' on' : ''}`} aria-hidden="true">{checked ? '✓' : ''}</span>
+                        </div>
+                        {imp.note && <p className="imp-note">{imp.note}</p>}
+                        <div className="improvement-meta">
+                          <span>Cost: {imp.cost}</span>
+                          <span>Saving: {imp.saving}</span>
+                        </div>
+                        <span className="improvement-gain">
+                          Could reach band {imp.newBand} ({imp.newScore}/100) ↑ +{imp.scoreGain} pts
+                        </span>
+                      </div>
+                    </Fragment>
+                  )
+                })}
+                {plan && (
+                  <div className="combined-card">
+                    <h4>Combined plan · {plan.count} improvement{plan.count > 1 ? 's' : ''}</h4>
+                    <p className="combined-line">
+                      Band {band.band} → {plan.newBand} ({plan.newScore}/100)
+                    </p>
+                    <div className="improvement-meta combined-meta">
+                      <span>Total cost: £{plan.costLow.toLocaleString()}–£{plan.costHigh.toLocaleString()}</span>
+                      <span>Saving: £{plan.savingLow.toLocaleString()}–£{plan.savingHigh.toLocaleString()}/yr</span>
                     </div>
-                    <span className="improvement-gain">
-                      Could reach band {imp.newBand} ({imp.newScore}/100) ↑ +{imp.scoreGain} pts
-                    </span>
                   </div>
-                ))}
+                )}
               </>
             )}
           </div>
