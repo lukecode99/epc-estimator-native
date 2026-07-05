@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { QUESTIONS, FLOOR_PRESETS } from '../data'
+import { FLOOR_AREA_MIN, FLOOR_AREA_MAX } from '../sap'
 
 async function haptic(style = 'LIGHT') {
   try {
@@ -11,6 +12,7 @@ async function haptic(style = 'LIGHT') {
 export default function Questionnaire({ onComplete, onBack, initialAnswers = {} }) {
   const [step, setStep] = useState(0)
   const [answers, setAnswers] = useState(initialAnswers)
+  const [numberError, setNumberError] = useState(null)
 
   const q = QUESTIONS[step]
   const val = answers[q.key]
@@ -29,14 +31,25 @@ export default function Questionnaire({ onComplete, onBack, initialAnswers = {} 
     advance(next)
   }
 
+  // Floor area outside 15–500 m² (including '0', which used to slip through
+  // and silently become the 85 m² default) is rejected with a message.
   function handleNumber() {
     if (!val) return
+    const n = parseFloat(val)
+    if (!Number.isFinite(n) || n < FLOOR_AREA_MIN || n > FLOOR_AREA_MAX) {
+      setNumberError(
+        `That doesn't look right — please enter a floor area between ${FLOOR_AREA_MIN} and ${FLOOR_AREA_MAX} m². Most homes are 50–200 m².`
+      )
+      return
+    }
+    setNumberError(null)
     haptic()
     advance(answers)
   }
 
   function goBack() {
     haptic()
+    setNumberError(null)
     if (step === 0) onBack()
     else setStep(step - 1)
   }
@@ -79,7 +92,7 @@ export default function Questionnaire({ onComplete, onBack, initialAnswers = {} 
                     <button
                       key={p.m2}
                       className={`preset-chip${String(val) === String(p.m2) ? ' selected' : ''}`}
-                      onClick={() => setAnswers({ ...answers, [q.key]: String(p.m2) })}
+                      onClick={() => { setNumberError(null); setAnswers({ ...answers, [q.key]: String(p.m2) }) }}
                     >
                       <span className="preset-name">{p.label}</span>
                       <span className="preset-m2">~{p.m2}m²</span>
@@ -95,11 +108,12 @@ export default function Questionnaire({ onComplete, onBack, initialAnswers = {} 
                 inputMode="numeric"
                 placeholder={q.placeholder}
                 value={val || ''}
-                onChange={e => setAnswers({ ...answers, [q.key]: e.target.value })}
+                onChange={e => { setNumberError(null); setAnswers({ ...answers, [q.key]: e.target.value }) }}
                 onKeyDown={e => e.key === 'Enter' && handleNumber()}
               />
               <span className="number-unit">{q.unit}</span>
             </div>
+            {numberError && <p className="input-error">{numberError}</p>}
             <div className="nav-row">
               <button className="btn-back" onClick={goBack}>←</button>
               <button className="btn-next" onClick={handleNumber} disabled={!val}>

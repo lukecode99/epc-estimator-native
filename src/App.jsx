@@ -10,6 +10,10 @@ import { showBanner, hideBanner } from './admob.js'
 export default function App() {
   const [screen, setScreen] = useState('home')
   const [answers, setAnswers] = useState({})
+  // The saved entry being viewed. A full entry means Results shows the
+  // STORED score/band/cost; after an edit only {id, name} survives so the
+  // recomputed result still saves back to the same entry (no duplicates).
+  const [viewing, setViewing] = useState(null)
 
   useEffect(() => {
     if (screen === 'results' || screen === 'saved') showBanner()
@@ -22,7 +26,7 @@ export default function App() {
 
   if (screen === 'home') return (
     <Home
-      onStart={() => { setAnswers({}); goTo('quiz') }}
+      onStart={() => { setAnswers({}); setViewing(null); goTo('quiz') }}
       onSaved={() => goTo('saved')}
       onPrivacy={() => goTo('privacy')}
     />
@@ -30,20 +34,25 @@ export default function App() {
   if (screen === 'quiz') return (
     <Questionnaire
       initialAnswers={answers}
-      onComplete={a => { setAnswers(a); goTo('results') }}
+      onComplete={a => {
+        setAnswers(a)
+        setViewing(v => (v ? { id: v.id, name: v.name } : null))
+        goTo('results')
+      }}
       onBack={() => goTo('home')}
     />
   )
   if (screen === 'saved') return (
     <SavedEstimates
       onBack={() => goTo('home')}
-      onView={entry => { setAnswers(entry.answers); goTo('results') }}
+      onView={entry => { setAnswers(entry.answers); setViewing(entry); goTo('results') }}
     />
   )
   return (
     <Results
       answers={answers}
-      onBack={() => goTo('home')}
+      savedEntry={viewing}
+      onBack={() => { setViewing(null); goTo('home') }}
       onEdit={() => goTo('quiz')}
     />
   )

@@ -173,6 +173,14 @@ body {
 }
 .number-input:focus { border-color: #2563a8; }
 .number-unit { font-size: 0.85rem; color: #6b7c93; }
+.input-error {
+  color: #c0392b;
+  background: #fdecea;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  margin: 0 0 12px;
+}
 
 .nav-row {
   display: flex;

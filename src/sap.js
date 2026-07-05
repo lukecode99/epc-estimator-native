@@ -1,7 +1,24 @@
 import { BANDS } from './data';
 
+// Valid floor-area range (m²). Outside this the questionnaire rejects the
+// input; the model clamps defensively so a bad stored value can't skew maths.
+export const FLOOR_AREA_MIN = 15;
+export const FLOOR_AREA_MAX = 500;
+
+export function normalisedArea(v) {
+  const n = parseFloat(v);
+  if (!Number.isFinite(n) || n <= 0) return 85;
+  return Math.min(FLOOR_AREA_MAX, Math.max(FLOOR_AREA_MIN, n));
+}
+
 export function calculateSAP(a) {
   let score = 63;
+
+  // Shared-wall heat loss: a flat has the least exposed envelope, a
+  // detached house the most. Weights: flat +8 · terraced +4 · semi 0 ·
+  // bungalow -3 · detached -5.
+  const ptype = { flat: 8, terraced: 4, semi: 0, bungalow: -3, detached: -5 };
+  score += ptype[a.propertyType] || 0;
 
   const era = { pre1930: -12, '1930_1966': -7, '1967_1982': -4, '1983_1995': -1, '1996_2010': 3, post2010: 10 };
   score += era[a.constructionEra] || 0;
@@ -45,7 +62,7 @@ export function calculateSAP(a) {
   const storeys = { '1': -3, '2': 0, '3plus': 2 };
   score += storeys[a.storeys] || 0;
 
-  const area = parseFloat(a.floorArea) || 85;
+  const area = normalisedArea(a.floorArea);
   if (area < 50) score += 4;
   else if (area > 150) score -= 4;
   else if (area > 100) score -= 2;
@@ -58,7 +75,7 @@ export function getBand(score) {
 }
 
 export function getAnnualCost(a) {
-  const area = parseFloat(a.floorArea) || 85;
+  const area = normalisedArea(a.floorArea);
   const baseCost = { gas: 900, oil: 1200, heatpump: 700, storage: 1400, electric: 1800 };
   let cost = baseCost[a.heatingType] || 900;
   cost *= area / 85;

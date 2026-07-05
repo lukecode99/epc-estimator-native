@@ -39,16 +39,22 @@ async function shareAsImage(element, fallbackText) {
   try { await navigator.clipboard.writeText(fallbackText) } catch {}
 }
 
-export default function Results({ answers, onBack, onEdit }) {
-  const score = calculateSAP(answers)
-  const band = getBand(score)
-  const cost = getAnnualCost(answers)
-  const improvements = getImprovements(answers, score)
+export default function Results({ answers, savedEntry, onBack, onEdit }) {
+  // A viewed saved estimate shows exactly what was stored — score, band,
+  // cost and improvements are NOT recomputed (the model may have changed
+  // since it was saved). A live/edited result computes fresh.
+  const isStored = savedEntry != null && savedEntry.score != null
+  const score = isStored ? savedEntry.score : calculateSAP(answers)
+  const band = isStored
+    ? BANDS.find(b => b.band === savedEntry.band) || getBand(score)
+    : getBand(score)
+  const cost = isStored ? savedEntry.cost : getAnnualCost(answers)
+  const improvements = isStored ? savedEntry.improvements || [] : getImprovements(answers, score)
 
   const captureRef = useRef(null)
 
   const [saveState, setSaveState] = useState('idle') // idle | naming | saved
-  const [saveName, setSaveName] = useState('')
+  const [saveName, setSaveName] = useState(savedEntry?.name || '')
   const [shareState, setShareState] = useState('idle') // idle | sharing | done
 
   function confirmSave() {
@@ -56,12 +62,17 @@ export default function Results({ answers, onBack, onEdit }) {
     const name = saveName.trim() || 'My Home'
     const existing = JSON.parse(localStorage.getItem('epc_estimates') || '[]')
     const entry = {
-      id: Date.now(),
+      id: savedEntry?.id ?? Date.now(),
       name,
       date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }),
       answers, score, band: band.band, bandColor: band.color, cost, improvements,
     }
-    localStorage.setItem('epc_estimates', JSON.stringify([entry, ...existing].slice(0, 20)))
+    // Re-saving a viewed/edited estimate updates it in place — no duplicate.
+    const idx = existing.findIndex(e => e.id === entry.id)
+    const next = idx >= 0
+      ? existing.map((e, i) => (i === idx ? entry : e))
+      : [entry, ...existing].slice(0, 20)
+    localStorage.setItem('epc_estimates', JSON.stringify(next))
     setSaveState('saved')
   }
 
@@ -77,8 +88,14 @@ export default function Results({ answers, onBack, onEdit }) {
   return (
     <div className="screen">
       <div className="screen-header">
-        <h1>Your EPC Estimate</h1>
-        <p>Based on the information you provided</p>
+        <h1>{savedEntry?.name || 'Your EPC Estimate'}</h1>
+        <p>
+          {isStored
+            ? `Saved estimate · ${savedEntry.date}`
+            : savedEntry?.name
+              ? 'Updated estimate — save to keep the changes'
+              : 'Based on the information you provided'}
+        </p>
       </div>
       <div className="results-body">
         <div ref={captureRef} className="capture-zone">
