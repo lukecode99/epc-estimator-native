@@ -11,8 +11,10 @@ export async function initAdMob() {
   try {
     const { AdMob, AdmobConsentStatus } = await import('@capacitor-community/admob')
     const { Capacitor } = await import('@capacitor/core')
-    await AdMob.initialize({ initializeForTesting: false })
 
+    // Consent is gathered BEFORE AdMob.initialize() — per Google's UMP
+    // guidance, initialize can start preloading (and touch the IDFA), so it
+    // must wait until the user has answered.
     let consent = await AdMob.requestConsentInfo()
 
     // ATT is an iOS-only concept; Android personalisation is governed by
@@ -39,7 +41,14 @@ export async function initAdMob() {
         consent.status === AdmobConsentStatus.NOT_REQUIRED)
 
     // UMP can veto ad requests outright (consent required, no form obtained).
-    initialised = consent.canRequestAds !== false
+    // The status check also covers plugins that predate canRequestAds, where
+    // `undefined !== false` would otherwise fail open.
+    if (consent.canRequestAds === false || consent.status === AdmobConsentStatus.REQUIRED) {
+      return
+    }
+
+    await AdMob.initialize({ initializeForTesting: false })
+    initialised = true
   } catch {
     // Running on web — AdMob not available
   }
