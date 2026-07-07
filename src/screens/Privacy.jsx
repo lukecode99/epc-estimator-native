@@ -6,7 +6,7 @@ export default function Privacy({ onBack }) {
         <p>EPC Estimator</p>
       </div>
       <div className="screen-body">
-        <p className="privacy-date">Last updated: 20 June 2026</p>
+        <p className="privacy-date">Last updated: 7 July 2026</p>
 
         <h2 className="privacy-h2">1. Who we are</h2>
         <p className="privacy-p">EPC Estimator is a free tool that helps homeowners estimate their property's Energy Performance Certificate (EPC) rating. The app is operated by Luke Holder.</p>
@@ -18,14 +18,15 @@ export default function Privacy({ onBack }) {
           <li>All answers you enter during the questionnaire are processed entirely within your browser.</li>
           <li>If you choose to save an estimate, it is stored only on your device (in the app's local storage). It is never sent to us or any third party.</li>
           <li>We do not use analytics, tracking pixels, or session recording tools.</li>
-          <li>We do not collect names, email addresses, or any personally identifiable information unless you voluntarily provide an email address to receive your estimate by email.</li>
+          <li>We do not collect names, email addresses, or any personally identifiable information.</li>
         </ul>
 
-        <h2 className="privacy-h2">3. Share by email</h2>
-        <p className="privacy-p">If you tap "Share" on the results screen and enter your email address, we will send you an image of your EPC estimate results. To do this, your email address and a screenshot image of your results are transmitted to our server. Your email address is used only to deliver this one-time message and is not stored, shared with third parties, or used for marketing purposes.</p>
+        <h2 className="privacy-h2">3. Sharing your results</h2>
+        <p className="privacy-p">If you tap "Share" on the results screen, your device's own share sheet opens so you can send an image or text summary of your estimate to an app of your choice (such as Messages or email). The share happens entirely on your device — nothing is sent to our servers, and we never see what you share or who you share it with.</p>
 
-        <h2 className="privacy-h2">4. Cookies and advertising</h2>
-        <p className="privacy-p">This app may display advertisements served by Google AdSense. Google AdSense uses cookies to serve ads based on your prior visits to this and other websites. You can opt out of personalised advertising by visiting <a href="https://www.google.com/settings/ads" className="privacy-link" target="_blank" rel="noopener noreferrer">Google Ads Settings</a>.</p>
+        <h2 className="privacy-h2">4. Advertising</h2>
+        <p className="privacy-p">The mobile app displays banner advertisements served by Google AdMob. AdMob may collect device information (such as advertising identifiers) to serve and measure ads. On iOS, we ask for your permission through Apple's App Tracking Transparency prompt before any advertising identifier is used — if you decline, ads are still shown but in non-personalised mode. Where consent is required by law (for example in the UK or EEA), a consent form is shown before any ads load, and ads remain non-personalised unless you consent.</p>
+        <p className="privacy-p">You can opt out of personalised advertising at any time by visiting <a href="https://www.google.com/settings/ads" className="privacy-link" target="_blank" rel="noopener noreferrer">Google Ads Settings</a>.</p>
         <p className="privacy-p">For more information on how Google uses data, see: <a href="https://policies.google.com/technologies/partner-sites" className="privacy-link" target="_blank" rel="noopener noreferrer">How Google uses data when you use our partners' sites or apps</a>.</p>
 
         <h2 className="privacy-h2">5. Local storage</h2>
