@@ -5,7 +5,7 @@ import { loadEstimates, storeEstimates, SAVE_CAP } from '../storage'
 import OfficialEpc from './OfficialEpc'
 import LandlordMees from './LandlordMees'
 import { grantsFor } from '../referrals'
-import { IconSave, IconShare, IconEdit, IconChevronRight, IconHouse, ImprovementIcon } from '../icons'
+import { IconSave, IconShare, IconEdit, IconChevronRight, IconHouse, ImprovementIcon, IconEpcLadder } from '../icons'
 import { Capacitor } from '@capacitor/core'
 
 const WIDTHS = { A: 55, B: 62, C: 70, D: 78, E: 84, F: 90, G: 96 }
@@ -163,7 +163,10 @@ export default function Results({ answers, savedEntry, onBack, onEdit, onEditQue
   return (
     <div className="screen">
       <div className="screen-header">
-        <h1>{savedEntry?.name || 'Your EPC Estimate'}</h1>
+        <div className="screen-header-row">
+          <span className="logo"><IconEpcLadder size={32} /></span>
+          <h1>{savedEntry?.name || 'Your EPC Estimate'}</h1>
+        </div>
         <p>
           {isStored
             ? `Saved estimate · ${savedEntry.date}`

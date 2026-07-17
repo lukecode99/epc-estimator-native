@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { BANDS } from '../data'
 import { searchPostcode, getCertificate } from '../epcRegister'
+import { IconEpcLadder } from '../icons'
 
 const bandColor = band => (BANDS.find(b => b.band === band) || {}).color || '#9aa5b4'
 
@@ -52,7 +53,10 @@ export default function PostcodeStart({ onContinue, onBack }) {
   return (
     <div className="screen">
       <div className="screen-header">
-        <h1>EPC Estimator</h1>
+        <div className="screen-header-row">
+          <span className="logo"><IconEpcLadder size={32} /></span>
+          <h1>EPC Estimator</h1>
+        </div>
         <p className="step-label">Before we start · Your existing EPC</p>
       </div>
       <div className="screen-body">

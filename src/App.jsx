@@ -25,10 +25,6 @@ export default function App() {
   // Which bottom-nav tab owns the current screen. Results reached from the
   // Saved list stays under the Saved tab; everything else is the flow.
   const [tab, setTab] = useState('new')
-  // Where the estimate flow was left when the user switched to the Saved
-  // tab, so tabbing back resumes (mid-questionnaire included) rather than
-  // restarting.
-  const [flowReturn, setFlowReturn] = useState('home')
   // Live questionnaire position — a tab switch mid-quiz keeps the answers
   // (synced via onProgress) and this step, so the quiz picks up where it was.
   const [quizStep, setQuizStep] = useState(0)
@@ -41,14 +37,8 @@ export default function App() {
   function goTo(s) { setScreen(s); setTab('new') }
 
   function openSavedTab() {
-    if (tab === 'new') setFlowReturn(screen)
     setTab('saved')
     setScreen('saved')
-  }
-
-  function openFlowTab() {
-    setTab('new')
-    setScreen(flowReturn)
   }
 
   // Start a brand-new estimate: clear any viewed entry, single-question edit
@@ -116,8 +106,6 @@ export default function App() {
         setAnswers(entry.answers)
         setViewing(entry)
         setEditKey(null)
-        // The viewed estimate becomes the current flow context.
-        setFlowReturn('results')
         setScreen('results')
       }}
     />
@@ -140,12 +128,9 @@ export default function App() {
         active={tab}
         aboveBanner={Capacitor.isNativePlatform() && (screen === 'results' || screen === 'saved')}
         onNewTab={() => {
-          // Mid-quiz (or on the register step) the tab is already the flow;
-          // from anywhere else it starts a fresh estimate — never reopens a
-          // previously viewed result.
-          if (screen === 'quiz' || screen === 'postcode') return
-          if (tab === 'saved' && flowReturn === 'quiz') openFlowTab()
-          else startFreshQuiz()
+          // The New estimate tab always lands on Home (Luke 17-Jul); the
+          // flow itself starts from the Start button there.
+          if (screen !== 'home') goTo('home')
         }}
         onSavedTab={() => { if (screen !== 'saved') openSavedTab() }}
       />

@@ -1,8 +1,13 @@
+import { IconEpcLadder } from '../icons'
+
 export default function Privacy({ onBack }) {
   return (
     <div className="screen">
       <div className="screen-header">
-        <h1>Privacy Policy</h1>
+        <div className="screen-header-row">
+          <span className="logo"><IconEpcLadder size={32} /></span>
+          <h1>Privacy Policy</h1>
+        </div>
         <p>EPC Estimator</p>
       </div>
       <div className="screen-body">

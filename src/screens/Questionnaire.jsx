@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { QUESTIONS, SECTIONS, FLOOR_PRESETS } from '../data'
+import { IconEpcLadder } from '../icons'
 import { FLOOR_AREA_MIN, FLOOR_AREA_MAX } from '../sap'
 
 // Section boundaries as question indices: [{ label, start, len }]
@@ -91,7 +92,10 @@ export default function Questionnaire({ onComplete, onBack, initialAnswers = {},
   return (
     <div className="screen">
       <div className="screen-header">
-        <h1>EPC Estimator</h1>
+        <div className="screen-header-row">
+          <span className="logo"><IconEpcLadder size={32} /></span>
+          <h1>EPC Estimator</h1>
+        </div>
         <p className="step-label">
           {single != null ? 'Edit your answer' : `${section.label} · Question ${step + 1} of ${total}`}
         </p>

@@ -23,7 +23,7 @@ export default function SavedEstimates({ onStartNew, onView }) {
     <div className="screen">
       <div className="home-hero">
         <div className="home-hero-row">
-          <span className="logo"><IconEpcLadder size={26} /></span>
+          <span className="logo"><IconEpcLadder size={32} /></span>
           <h1>Saved Estimates</h1>
         </div>
         <p className="saved-hero-count">
