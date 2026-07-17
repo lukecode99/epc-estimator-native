@@ -6,7 +6,7 @@ export default function Privacy({ onBack }) {
         <p>EPC Estimator</p>
       </div>
       <div className="screen-body">
-        <p className="privacy-date">Last updated: 7 July 2026</p>
+        <p className="privacy-date">Last updated: 17 July 2026</p>
 
         <h2 className="privacy-h2">1. Who we are</h2>
         <p className="privacy-p">EPC Estimator is a free tool that helps homeowners estimate their property's Energy Performance Certificate (EPC) rating. The app is operated by Luke Holder.</p>
@@ -17,6 +17,7 @@ export default function Privacy({ onBack }) {
         <ul className="privacy-list">
           <li>All answers you enter during the questionnaire are processed entirely within your browser.</li>
           <li>If you choose to save an estimate, it is stored only on your device (in the app's local storage). It is never sent to us or any third party.</li>
+          <li>If you use the optional EPC register lookup, the postcode you enter is sent to the official GOV.UK EPC open data register to retrieve matching certificates. It is used only for that lookup and is not stored by us.</li>
           <li>We do not use analytics, tracking pixels, or session recording tools.</li>
           <li>We do not collect names, email addresses, or any personally identifiable information.</li>
         </ul>

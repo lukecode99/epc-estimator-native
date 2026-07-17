@@ -47,18 +47,18 @@ body {
 .home-hero {
   background: linear-gradient(135deg, #1a3a5c 0%, #2563a8 100%);
   color: #fff;
-  padding: 0 20px 12px;
+  padding: 0 20px 16px;
   padding-top: env(safe-area-inset-top);
 }
 .home-hero-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding-top: 4px;
+  gap: 10px;
+  padding-top: 10px;
 }
 .home-hero .logo { display: flex; align-items: center; color: #fff; flex-shrink: 0; }
-.home-hero h1 { font-size: 1.3rem; font-weight: 800; color: #fff; margin: 0; }
+.home-hero h1 { font-size: 1.7rem; font-weight: 800; color: #fff; margin: 0; }
 
 .home-body { padding: 24px 20px; }
 

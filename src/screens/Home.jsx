@@ -5,7 +5,7 @@ export default function Home({ onStart, onPrivacy }) {
     <div className="screen">
       <div className="home-hero">
         <div className="home-hero-row">
-          <span className="logo"><IconEpcLadder size={26} /></span>
+          <span className="logo"><IconEpcLadder size={32} /></span>
           <h1>EPC Estimator</h1>
         </div>
       </div>
